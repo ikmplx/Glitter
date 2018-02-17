@@ -1,13 +1,8 @@
-// Local Headers
-#include "glitter.h"
+#include "stdafx.h"
 
-// System Headers
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-// Standard Headers
-#include <cstdio>
-#include <cstdlib>
+// Define Some Constants
+const int mWidth = 1280;
+const int mHeight = 800;
 
 int main() 
 {

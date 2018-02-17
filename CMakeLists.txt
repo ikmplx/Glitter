@@ -15,6 +15,7 @@ add_subdirectory(Glitter/Vendor/assimp)
 if(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /SAFESEH:NO")
+
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
     if(NOT WIN32)
@@ -31,7 +32,8 @@ include_directories(Glitter/Sources/
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c)
 
-file(GLOB PROJECT_SOURCES Glitter/Sources/*.cpp Glitter/Sources/*.h)
+file(GLOB PROJECT_SOURCES Glitter/Sources/*.cpp )
+file(GLOB PROJECT_HEADERS Glitter/Sources/*.h)
 file(GLOB PROJECT_SHADERS Glitter/Shaders/*.comp
                           Glitter/Shaders/*.frag
                           Glitter/Shaders/*.geom
@@ -42,14 +44,20 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
                          .gitignore
                          .gitmodules)
 
+
+if (MSVC)
+    set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/Yu")
+    set_source_files_properties(Glitter/Sources/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yc")
+endif()
+
 source_group("Shaders" FILES ${PROJECT_SHADERS})
-source_group("Sources" FILES ${PROJECT_SOURCES})
+source_group("Sources" FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 source_group("Vendors" FILES ${VENDORS_SOURCES})
 
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} # ${PROJECT_HEADERS}
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} 
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})
 
