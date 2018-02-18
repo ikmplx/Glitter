@@ -57,7 +57,7 @@ namespace MyGL
 
 		auto res = _sInstance;
 
-		res->AddShader("Rainbow", "test");
+		res->AddShader("test", "test");
 
 		res->AddTexture("Crate", "container.jpg");
 		res->AddTexture("Awesome", "awesomeface.png");

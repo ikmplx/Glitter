@@ -90,6 +90,11 @@ namespace MyGL
 		return glGetUniformLocation(ID, id.c_str());
 	}
 
+	GLint Shader::GetUniformLocation(const char* id) const
+	{
+		return glGetUniformLocation(ID, id);
+	}
+
 	void Shader::SetBool(const std::string & name, bool value) const
 	{
 		glUniform1i(GetUniformLocation(name), (int)value);

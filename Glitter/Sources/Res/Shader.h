@@ -14,6 +14,7 @@ namespace MyGL
 		void Bind();
 
 		GLint GetUniformLocation(const std::string& id) const;
+		GLint GetUniformLocation(const char* id) const;
 
 		// utility uniform functions
 		void SetBool(const std::string &name, bool value) const;

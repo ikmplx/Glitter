@@ -1,13 +1,9 @@
 #pragma once
 
+#include "Forward.h"
+
 namespace MyGL
 {
-	class Shader;
-	using ShaderPtr = std::shared_ptr<Shader>;
-
-	class Texture;
-	using TexturePtr = std::shared_ptr<Texture>;
-
 	enum class ResourceType 
 	{
 		Texture,

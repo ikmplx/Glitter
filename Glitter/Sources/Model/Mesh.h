@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Forward.h"
+
 namespace MyGL
 {
 	class Mesh
@@ -16,24 +18,24 @@ namespace MyGL
 			glm::vec3 bitangent;
 		};
 
-		struct Texture
-		{
-			GLuint id;
-			std::string type;
-			std::string path;
-		};
-
-
 		std::vector<Vertex> vertices;
 		std::vector<unsigned> indices;
 
-		std::vector<Texture> textures;
+		std::vector<TexturePtr> textures;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, std::vector<Texture> textures);
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, std::vector<TexturePtr> textures);
+		~Mesh();
+
+		void Draw(ShaderPtr shader);
 
 	private:
-		GLuint _vba;
+		GLuint _vao;
 		GLuint _vbo;
 		GLuint _ibo;
 	};
+	using MeshPtr = std::shared_ptr<Mesh>;
+
+	namespace Primitives {
+		MeshPtr CreateCube();
+	}
 }

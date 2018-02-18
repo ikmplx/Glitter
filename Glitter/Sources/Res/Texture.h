@@ -4,6 +4,14 @@
 
 namespace MyGL
 {
+	enum class TextureUsage
+	{
+		Diffuse,
+		Specular,
+		Normal,
+		None
+	};
+
 	class Texture : public Resource
 	{
 	public:
@@ -13,7 +21,8 @@ namespace MyGL
 		void Bind();
 
 	public:
-		GLuint ID;
+		GLuint ID = 0;
+		TextureUsage Usage = TextureUsage::None;
 	};
 
 	using TexturePtr = std::shared_ptr<Texture>;
