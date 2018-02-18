@@ -1,11 +1,12 @@
 #include "stdafx.h"
 
-#include "Shader.h"
+#include "Res/Shader.h"
+#include "Res/Texture.h"
 
 
 // Define Some Constants
-const int mWidth = 1280;
-const int mHeight = 800;
+const int mWidth = 1024;
+const int mHeight = 768;
 
 GLuint vba;
 
@@ -13,8 +14,6 @@ GLuint posVbo;
 GLuint colorVbo;
 
 GLuint ibo;
-
-Shader* shader;
 
 static void PrepareBuffers()
 {
@@ -26,10 +25,10 @@ static void PrepareBuffers()
 	glGenBuffers(1, &ibo);
 
 	const float vertices[] = {
-		-0.5f, -0.5f,
-		0.5f, -0.5f,
-		0.5f, 0.5f,
-		-0.5f, 0.5f
+		-0.5f, -0.5f,  0.f, 0.f,
+		0.5f, -0.5f,   1.f, 0.f,
+		0.5f, 0.5f,    1.f, 1.f,
+		-0.5f, 0.5f,    0.f, 1.f
 	};
 
 	const float colors[] = {
@@ -39,6 +38,8 @@ static void PrepareBuffers()
 		1.f, 0.f, 0.5f
 	};
 
+
+
 	const int indices[] = {
 		0, 1, 2, 3
 	};
@@ -47,28 +48,40 @@ static void PrepareBuffers()
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, posVbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
 		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(2);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	}
 	glBindVertexArray(0);
-
-	shader = new Shader("Shaders/test.vert", "Shaders/test.frag");
 }
 
 static void DrawBuffers()
 {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glBindVertexArray(vba);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-	shader->Use();
+	auto shader = MyGL::ResourceManager::Instance()->GetShader("Rainbow");
+	auto texture = MyGL::ResourceManager::Instance()->GetTexture("Crate");
+
+	glActiveTexture(GL_TEXTURE0);
+	texture->Bind();
+
+	shader->Bind();
+	shader->SetInt("tex", 0);
+
 	glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -102,6 +115,11 @@ int main()
 	gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress));
 
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
+	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VENDOR));
+	fprintf(stderr, "OpenGL %s\n", glGetString(GL_RENDERER));
+	fprintf(stderr, "OpenGL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	MyGL::ResourceManager::Instance()->Initialize();
 
 	glViewport(0, 0, mWidth, mHeight);
 
@@ -123,10 +141,7 @@ int main()
 		glfwPollEvents();
 	}
 
-	if (shader) {
-		delete shader;
-		shader = nullptr;
-	}
+	MyGL::ResourceManager::Instance()->Deinitialize();
 
 	glfwTerminate();
 	return EXIT_SUCCESS;

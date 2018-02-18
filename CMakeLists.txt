@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.8)
 
 project(Glitter)
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
@@ -15,7 +18,6 @@ add_subdirectory(Glitter/Vendor/assimp)
 if(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /SAFESEH:NO")
-
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
     if(NOT WIN32)
@@ -32,12 +34,17 @@ include_directories(Glitter/Sources/
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c)
 
-file(GLOB PROJECT_SOURCES Glitter/Sources/*.cpp )
-file(GLOB PROJECT_HEADERS Glitter/Sources/*.h)
+file(GLOB_RECURSE PROJECT_SOURCES Glitter/Sources/*.cpp )
+file(GLOB_RECURSE PROJECT_HEADERS Glitter/Sources/*.h)
+
 file(GLOB PROJECT_SHADERS Glitter/Shaders/*.comp
                           Glitter/Shaders/*.frag
                           Glitter/Shaders/*.geom
                           Glitter/Shaders/*.vert)
+
+file(GLOB PROJECT_TEXTURES Glitter/Textures/*.jpg
+                           Glitter/Textures/*.png)
+
 file(GLOB PROJECT_CONFIGS CMakeLists.txt
                           Readme.md
                          .gitattributes
@@ -46,25 +53,45 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
 
 
 if (MSVC)
+	#set(PrecompiledBinary "${CMAKE_CURRENT_BINARY_DIR}/stdafx.pch")
+	#set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/Yustdafx.h /Fp\"${PrecompiledBinary}\""  OBJECT_OUTPUTS "${PrecompiledBinary}")
+    #set_source_files_properties(Glitter/Sources/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h /Fp\"${PrecompiledBinary}\""  OBJECT_OUTPUTS "${PrecompiledBinary}")
+
     set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/Yu")
     set_source_files_properties(Glitter/Sources/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yc")
+
+	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+	# Begin copypaste from SO
+	foreach(FILE ${PROJECT_SOURCES} ${PROJECT_HEADERS}) 
+		# Get the directory of the source file
+		get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+
+		# Remove common directory prefix to make the group
+		string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" GROUP "${PARENT_DIR}")
+
+		# Make sure we are using windows slashes
+		string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+		source_group("Sources${GROUP}" FILES "${FILE}")
+	endforeach()
+	# End copypaste
+
 endif()
 
 source_group("Shaders" FILES ${PROJECT_SHADERS})
-source_group("Sources" FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+source_group("Textures" FILES ${PROJECT_TEXTURES})
+#source_group("Sources" FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 source_group("Vendors" FILES ${VENDORS_SOURCES})
 
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} 
-                               ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
+                               ${PROJECT_SHADERS} ${PROJECT_CONFIGS} ${PROJECT_TEXTURES}
                                ${VENDORS_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} assimp glfw
                       ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Glitter")
