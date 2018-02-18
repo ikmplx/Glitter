@@ -52,6 +52,7 @@ namespace MyGL
 		ShaderPtr AddShader(const std::string& name, const std::string& baseName);
 		ShaderPtr GetShader(const std::string & name);
 
+		TexturePtr EnsureTexture(const std::string& name, const std::string& path);
 		TexturePtr AddTexture(const std::string& name, const std::string& baseName);
 		TexturePtr GetTexture(const std::string & name);
 

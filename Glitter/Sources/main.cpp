@@ -3,6 +3,7 @@
 #include "Res/Shader.h"
 #include "Res/Texture.h"
 #include "Model/Mesh.h"
+#include "Model/Model.h"
 
 
 // Define Some Constants
@@ -10,32 +11,42 @@ const int mWidth = 1024;
 const int mHeight = 768;
 
 static MyGL::MeshPtr cube;
+static MyGL::ModelPtr nanosuit;
 
 static void PrepareBuffers()
 {
 	cube = MyGL::Primitives::CreateCube();
+	nanosuit = std::make_shared<MyGL::Model>("Models/nanosuit/nanosuit.obj");
 }
 
 static void DrawBuffers()
 {
-	// glDisable(GL_CULL_FACE);
+	float angle =  glm::two_pi<float>() * (float) std::fmod(glfwGetTime() / 3.0, 1.0);
 
-
-	float angle = glm::two_pi<float>() * std::fmod(glfwGetTime() / 3.0, 1.0);
-
-	glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(0.f, 0.f, -10.f));
-	glm::mat4 model = glm::scale(glm::mat4(1), glm::vec3(3, 3, 3));
-	model = glm::rotate(model, angle, glm::vec3(0.0f, 1.f, 0.f));
-
+	glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(0.f, -7.f, -27.f));
 	glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)mWidth / mHeight, 1.f, 100.f);
 
 	auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
 	shader->Bind();
 	shader->SetMatrix("view", view);
-	shader->SetMatrix("model", model);
 	shader->SetMatrix("proj", proj);
 
+	glm::mat4 model;
+
+	model = glm::mat4(1);
+	model = glm::translate(model, glm::vec3(0.0f, 18.f, 0.f));
+
+	model = glm::scale(model, glm::vec3(3, 3, 3));
+	model = glm::rotate(model, angle, glm::vec3(0.0f, 1.f, 0.f));
+	shader->SetMatrix("model", model);
+
 	cube->Draw(shader);
+
+	model = glm::mat4(1);
+	model = glm::rotate(model, angle, glm::vec3(0.0f, 1.f, 0.f));
+	shader->SetMatrix("model", model);
+
+	nanosuit->Draw(shader);
 }
 
 int main() 
@@ -47,6 +58,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	// glfwWindowHint(GLFW_SAMPLES, 16);
 
 	auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
 

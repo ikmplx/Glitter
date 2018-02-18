@@ -29,15 +29,17 @@ namespace MyGL
 
 	bool ResourceManager::ResourceDescription::operator==(const ResourceDescription & desc) const
 	{
-		return desc.type == type && desc.name == desc.name;
+		return desc.type == type && desc.name == name;
 	}
 
 	size_t ResourceManager::ResourceHasher::operator()(const ResourceDescription & desc) const
 	{
-		size_t hash1 = std::hash_value(desc.type);
-		size_t hash2 = std::hash_value(desc.name);
+		size_t seed = 0;
 
-		return hash1 * 37 + hash2;
+		seed = std::hash_value(desc.name) + (seed << 6) + (seed << 16) - seed;
+		seed = std::hash_value(desc.type) + (seed << 6) + (seed << 16) - seed;
+
+		return seed;
 	}
 
 
@@ -88,6 +90,22 @@ namespace MyGL
 		return std::static_pointer_cast<Shader>(Find(ResourceType::Shader, name));
 	}
 
+	TexturePtr ResourceManager::EnsureTexture(const std::string & name, const std::string & path)
+	{
+		TexturePtr ret;
+
+		auto iter = _resources.find(ResourceDescription{ ResourceType::Texture, name });
+		if (iter != _resources.end()) {
+			ret = std::static_pointer_cast<Texture>(iter->second);
+		}
+		else {
+			ret = std::make_shared<Texture>(name, path);
+			Add(ret);
+		}
+
+		return ret;
+	}
+
 	TexturePtr ResourceManager::AddTexture(const std::string & name, const std::string & baseName)
 	{
 		TexturePtr texture = std::make_shared<Texture>(name, std::string("Textures/") + baseName);
@@ -103,6 +121,14 @@ namespace MyGL
 	void ResourceManager::Add(ResourcePtr res)
 	{
 		_resources[ResourceDescription{ res->GetType(), res->GetName() }] = res;
+
+#if 0
+		std::cout << "[ResourceManager] Hash status: ";
+		for (size_t i = 0; i < _resources.bucket_count(); i++) {
+			std::cout << _resources.bucket_size(i) << " ";
+		}
+		std::cout << "\n";
+#endif
 	}
 
 	ResourcePtr ResourceManager::Find(ResourceType type, const std::string & name)

@@ -1,10 +1,5 @@
 #pragma once
 
-// System Headers
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
-
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
@@ -26,4 +21,3 @@
 #include <unordered_set>
 #include <string>
 #include <memory>
-

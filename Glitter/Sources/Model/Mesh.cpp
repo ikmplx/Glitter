@@ -167,7 +167,7 @@ namespace MyGL
 			20, 23, 22
 		};
 
-		std::vector<TexturePtr> textures{ ResourceManager::Instance()->GetTexture("Crate") };
+		std::vector<TexturePtr> textures{ ResourceManager::Instance()->GetTexture("Awesome") };
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::move(textures));
 	}
