@@ -5,10 +5,13 @@
 #include "Model/Mesh.h"
 #include "Model/Model.h"
 
+#include "imgui_impl_glfw_gl3.h"
 
 // Define Some Constants
-const int mWidth = 1024;
-const int mHeight = 768;
+const int mWidth = 1280;
+const int mHeight = 800;
+
+static float guyRotation = 0.f;
 
 static MyGL::MeshPtr cube;
 static MyGL::ModelPtr nanosuit;
@@ -43,7 +46,7 @@ static void DrawBuffers()
 	cube->Draw(shader);
 
 	model = glm::mat4(1);
-	model = glm::rotate(model, angle, glm::vec3(0.0f, 1.f, 0.f));
+	model = glm::rotate(model, guyRotation, glm::vec3(0.0f, 1.f, 0.f));
 	shader->SetMatrix("model", model);
 
 	nanosuit->Draw(shader);
@@ -89,10 +92,14 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
+	ImGui_ImplGlfwGL3_Init(mWindow, true);
+
 	// Rendering Loop
 	while (glfwWindowShouldClose(mWindow) == false) {
 		if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(mWindow, true);
+
+		ImGui_ImplGlfwGL3_NewFrame();
 
 		// Background Fill Color
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -100,10 +107,16 @@ int main()
 
 		DrawBuffers();
 
+		ImGui::SliderFloat("Rotate", &guyRotation, 0.f, glm::two_pi<float>());
+
+		ImGui::Render();
+
 		// Flip Buffers and Draw
 		glfwSwapBuffers(mWindow);
 		glfwPollEvents();
 	}
+
+	ImGui_ImplGlfwGL3_Shutdown();
 
 	MyGL::ResourceManager::Instance()->Deinitialize();
 

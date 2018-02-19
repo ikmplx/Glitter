@@ -9,6 +9,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "imgui.h"
+
 // Standard Headers
 #include <cstdio>
 #include <cstdlib>
@@ -21,3 +23,4 @@
 #include <unordered_set>
 #include <string>
 #include <memory>
+

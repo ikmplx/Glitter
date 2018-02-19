@@ -122,6 +122,7 @@ namespace MyGL
 	{
 		_resources[ResourceDescription{ res->GetType(), res->GetName() }] = res;
 
+		std::cout << "[ResourceManager] Loaded " << res->GetName() << "\n";
 #if 0
 		std::cout << "[ResourceManager] Hash status: ";
 		for (size_t i = 0; i < _resources.bucket_count(); i++) {

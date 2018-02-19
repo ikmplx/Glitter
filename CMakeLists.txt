@@ -30,9 +30,16 @@ include_directories(Glitter/Sources/
                     Glitter/Vendor/glad/include/
                     Glitter/Vendor/glfw/include/
                     Glitter/Vendor/glm/
-                    Glitter/Vendor/stb/)
+                    Glitter/Vendor/stb/
 
-file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c)
+					Glitter/Vendor/imgui/
+					Glitter/Vendor/imgui_impl/
+					)
+
+file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c 
+                          Glitter/Vendor/imgui/imgui*.cpp
+                          Glitter/Vendor/imgui_impl/*.cpp
+						  )
 
 file(GLOB_RECURSE PROJECT_SOURCES Glitter/Sources/*.cpp )
 file(GLOB_RECURSE PROJECT_HEADERS Glitter/Sources/*.h)
