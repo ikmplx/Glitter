@@ -110,6 +110,8 @@ namespace MyGL
 	{
 		TexturePtr texture = std::make_shared<Texture>(name, std::string("Textures/") + baseName);
 		Add(std::static_pointer_cast<Texture>(texture));
+
+
 		return texture;
 	}
 

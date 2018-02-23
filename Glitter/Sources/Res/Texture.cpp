@@ -2,13 +2,19 @@
 
 #include "Texture.h"
 
+#include "chrono"
+
 #include <stb_image.h>
+
+
 
 namespace MyGL
 {
 	Texture::Texture(const std::string& name, const std::string& path)
 		: Resource(name, ResourceType::Texture)
 	{
+		auto timeBefore = std::chrono::steady_clock::now();
+
 		GLuint texture;
 
 		glGenTextures(1, &texture);
@@ -34,6 +40,12 @@ namespace MyGL
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		ID = texture;
+
+		std::cout << "[ResourceManager] Texture "
+			<< GetName()
+			<< " loaded in "
+			<< std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - timeBefore).count()
+			<< "\n";
 	}
 
 	Texture::~Texture()
