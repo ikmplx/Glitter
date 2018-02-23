@@ -5,10 +5,16 @@ in vec3 vColor;
 
 out vec4 FragColor;
 
+uniform bool has_diffuse1;
 uniform sampler2D texture_diffuse1;
 
 void main()
 {
-	vec3 texColor = texture(texture_diffuse1, vUv).rgb;
-	FragColor = vec4(texColor * vColor, 1.0);
+	vec3 texColor = vColor;
+
+	if (has_diffuse1) {
+		texColor *= texture(texture_diffuse1, vUv).rgb;
+	}
+	
+	FragColor = vec4(texColor, 1.0);
 } 

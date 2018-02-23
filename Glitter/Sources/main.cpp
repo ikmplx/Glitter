@@ -15,15 +15,20 @@ const int mHeight = 800;
 static float guyRotation = 0.f;
 
 static MyGL::EntityPtr nanosuitPrefab;
+static MyGL::EntityPtr towerPrefab;
 static MyGL::ScenePtr scene;
 
 static MyGL::EntityPtr centerEntity;
 static MyGL::EntityPtr nanosuitEntity1;
 static MyGL::EntityPtr nanosuitEntity2;
+static MyGL::EntityPtr towerEntity;
 
 static void PrepareBuffers()
 {
 	nanosuitPrefab = MyGL::ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
+
+	towerPrefab = MyGL::ModelLoader::LoadModel("Models/vox/chr_sword.ply");
+	towerPrefab->rotation = glm::angleAxis(glm::radians(-90.f), glm::vec3(1, 0, 0));
 
 	scene = std::make_shared<MyGL::Scene>();
 
@@ -32,11 +37,15 @@ static void PrepareBuffers()
 	nanosuitEntity1 = nanosuitPrefab->Clone();
 	nanosuitEntity2 = nanosuitPrefab->Clone();
 
-	nanosuitEntity1->position += glm::vec3(-5, 0, 0);
-	nanosuitEntity2->position += glm::vec3(5, 0, 0);
+	nanosuitEntity1->position += glm::vec3(-10, 0, 0);
+	nanosuitEntity2->position += glm::vec3(10, 0, 0);
+
+	towerEntity = towerPrefab->Clone();
+	towerEntity->position += glm::vec3(0, 0, -10);
 
 	centerEntity->AddChild(nanosuitEntity1);
 	centerEntity->AddChild(nanosuitEntity2);
+	centerEntity->AddChild(towerEntity);
 }
 
 static void DrawBuffers()
@@ -44,11 +53,11 @@ static void DrawBuffers()
 	float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
 	float constantProgress = (float) fmod(glfwGetTime(), 100.0) * 4.f;
 
-	glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(0.f, -7.f, -27.f));
+	glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(0.f, -7.f, -37.f));
 	glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)mWidth / mHeight, 1.f, 100.f);
 
 	//nanosuitEntity1->scale = nanosuitEntity2->scale = glm::vec3(pulseProgress);
-	//nanosuitEntity1->rotation = nanosuitEntity2->rotation = glm::angleAxis(4.f * guyRotation, glm::vec3(0, 1, 0));
+
 	centerEntity->rotation = glm::angleAxis(0.f, glm::vec3(1, 0, 0));
 
 	centerEntity->rotation *= glm::angleAxis(constantProgress, glm::vec3(0, 1, 0));

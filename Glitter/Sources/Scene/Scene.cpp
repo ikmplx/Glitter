@@ -23,8 +23,8 @@ namespace MyGL
 		
 		EntityPtr parentEntity = _parent.lock();
 		if (parentEntity) {
-			_globalScale = scale * parentEntity->_globalScale;
-			_globalRotation = rotation * parentEntity->_globalRotation;
+			_globalScale = parentEntity->_globalScale * scale;
+			_globalRotation =  parentEntity->_globalRotation * rotation;
 			_globalPosition = parentEntity->_globalPosition + parentEntity->rotation * position * parentEntity->scale;
 		}
 		else {
