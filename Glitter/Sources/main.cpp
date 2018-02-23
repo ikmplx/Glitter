@@ -4,6 +4,7 @@
 #include "Res/Texture.h"
 #include "Model/Mesh.h"
 #include "Model/Model.h"
+#include "Scene/Scene.h"
 
 #include "imgui_impl_glfw_gl3.h"
 
@@ -13,43 +14,54 @@ const int mHeight = 800;
 
 static float guyRotation = 0.f;
 
-static MyGL::MeshPtr cube;
-static MyGL::ModelPtr nanosuit;
+static MyGL::EntityPtr nanosuitPrefab;
+static MyGL::ScenePtr scene;
+
+static MyGL::EntityPtr centerEntity;
+static MyGL::EntityPtr nanosuitEntity1;
+static MyGL::EntityPtr nanosuitEntity2;
 
 static void PrepareBuffers()
 {
-	cube = MyGL::Primitives::CreateCube();
-	nanosuit = std::make_shared<MyGL::Model>("Models/nanosuit/nanosuit.obj");
+	nanosuitPrefab = MyGL::ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
+
+	scene = std::make_shared<MyGL::Scene>();
+
+	centerEntity = scene->CreateEntity();
+
+	nanosuitEntity1 = nanosuitPrefab->Clone();
+	nanosuitEntity2 = nanosuitPrefab->Clone();
+
+	nanosuitEntity1->position += glm::vec3(-5, 0, 0);
+	nanosuitEntity2->position += glm::vec3(5, 0, 0);
+
+	centerEntity->AddChild(nanosuitEntity1);
+	centerEntity->AddChild(nanosuitEntity2);
 }
 
 static void DrawBuffers()
 {
-	float angle =  glm::two_pi<float>() * (float) std::fmod(glfwGetTime() / 3.0, 1.0);
+	float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
+	float constantProgress = (float) fmod(glfwGetTime(), 100.0) * 4.f;
 
 	glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(0.f, -7.f, -27.f));
 	glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)mWidth / mHeight, 1.f, 100.f);
+
+	//nanosuitEntity1->scale = nanosuitEntity2->scale = glm::vec3(pulseProgress);
+	//nanosuitEntity1->rotation = nanosuitEntity2->rotation = glm::angleAxis(4.f * guyRotation, glm::vec3(0, 1, 0));
+	centerEntity->rotation = glm::angleAxis(0.f, glm::vec3(1, 0, 0));
+
+	centerEntity->rotation *= glm::angleAxis(constantProgress, glm::vec3(0, 1, 0));
+	centerEntity->rotation *= glm::angleAxis(guyRotation, glm::vec3(1, 0, 0));
+
+	//centerEntity->scale = glm::vec3(pulseProgress);
 
 	auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
 	shader->Bind();
 	shader->SetMatrix("view", view);
 	shader->SetMatrix("proj", proj);
 
-	glm::mat4 model;
-
-	model = glm::mat4(1);
-	model = glm::translate(model, glm::vec3(0.0f, 18.f, 0.f));
-
-	model = glm::scale(model, glm::vec3(3, 3, 3));
-	model = glm::rotate(model, angle, glm::vec3(0.0f, 1.f, 0.f));
-	shader->SetMatrix("model", model);
-
-	cube->Draw(shader);
-
-	model = glm::mat4(1);
-	model = glm::rotate(model, guyRotation, glm::vec3(0.0f, 1.f, 0.f));
-	shader->SetMatrix("model", model);
-
-	nanosuit->Draw(shader);
+	scene->Draw(shader);
 }
 
 int main() 
@@ -61,7 +73,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	// glfwWindowHint(GLFW_SAMPLES, 16);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
 

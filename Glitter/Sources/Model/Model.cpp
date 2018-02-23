@@ -4,6 +4,7 @@
 #include "Res/Res.h"
 #include "Res/Texture.h"
 #include "Mesh.h"
+#include "Scene/Scene.h"
 
 // System Headers
 #include <assimp/Importer.hpp>
@@ -12,22 +13,33 @@
 
 namespace MyGL
 {
-	struct ModelPrivate
+	struct ModelLoaderHelper
 	{
 		std::vector<MeshPtr> meshes;
 		std::string directory;
+		EntityPtr entity;
 
-		void ProcessNode(aiNode* node, const aiScene* scene)
+		EntityPtr ProcessNode(aiNode* node, const aiScene* scene)
 		{
+			EntityPtr nodeEntity = std::make_shared<Entity>();
+
 			for (unsigned iMesh = 0; iMesh < node->mNumMeshes; iMesh++) {
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[iMesh]];
-				meshes.push_back(ProcessMesh(mesh, scene));
+
+				EntityPtr subMeshEntity = std::make_shared<Entity>();
+				subMeshEntity->SetMesh(ProcessMesh(mesh, scene));
+
+				nodeEntity->AddChild(subMeshEntity);
 			}
 
 			for (unsigned iNode = 0; iNode < node->mNumChildren; iNode++) {
 				aiNode* childNode = node->mChildren[iNode];
-				ProcessNode(childNode, scene);
+				EntityPtr subNodeEntity = ProcessNode(childNode, scene);
+
+				nodeEntity->AddChild(subNodeEntity);
 			}
+
+			return nodeEntity;
 		}
 
 		MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene)
@@ -105,29 +117,21 @@ namespace MyGL
 		}
 	};
 
-	Model::Model(const std::string& path)
-		: d(new ModelPrivate)
+
+	EntityPtr ModelLoader::LoadModel(const std::string & path)
 	{
+		ModelLoaderHelper d;
+
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);// | aiProcess_FlipUVs);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			std::cerr << "Error loading model " << path << ": " << importer.GetErrorString() << "\n";
-			return;
+			return std::make_shared<Entity>();
 		}
 
-		d->directory = path.substr(0, path.find_last_of('/'));
-		d->ProcessNode(scene->mRootNode, scene);
-	}
-
-	Model::~Model() 
-	{
-	}
-
-	void Model::Draw(ShaderPtr shader)
-	{
-		for (auto& mesh : d->meshes) {
-			mesh->Draw(shader);
-		}
+		d.directory = path.substr(0, path.find_last_of('/'));
+		return d.ProcessNode(scene->mRootNode, scene);
 	}
 }
+

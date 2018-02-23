@@ -15,4 +15,11 @@ namespace MyGL
 
 	class Mesh;
 	using MeshPtr = std::shared_ptr<Mesh>;
+
+	class Scene;
+	using ScenePtr = std::shared_ptr<Scene>;
+
+	class Entity;
+	using EntityPtr = std::shared_ptr<Entity>;
+	using EntityWeakPtr = std::weak_ptr<Entity>;
 }

@@ -4,18 +4,8 @@
 
 namespace MyGL
 {
-	struct ModelPrivate;
-	class Model
+	namespace ModelLoader
 	{
-	public:
-		Model(const std::string& path);
-		~Model();
-
-		void Draw(ShaderPtr shader);
-
-	private:
-		std::unique_ptr<ModelPrivate> d;
+		EntityPtr LoadModel(const std::string& path);
 	};
-
-	using ModelPtr = std::shared_ptr<Model>;
 }
