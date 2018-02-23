@@ -5,6 +5,7 @@
 #include "Res/Texture.h"
 #include "Mesh.h"
 #include "Scene/Scene.h"
+#include "Material.h"
 
 // System Headers
 #include <assimp/Importer.hpp>
@@ -46,7 +47,7 @@ namespace MyGL
 		{
 			std::vector<Mesh::Vertex> vertices;
 			std::vector<unsigned> indices;
-			std::vector<TexturePtr> textures;
+			MaterialPtr myMaterial = std::make_shared<Material>();
 
 			auto ProcessVec3 = [](const aiVector3D& vector) {
 				return glm::vec3(vector.x, vector.y, vector.z);
@@ -91,15 +92,15 @@ namespace MyGL
 			if (mesh->mMaterialIndex >= 0) {
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-				LoadMaterialTextures(material, aiTextureType::aiTextureType_DIFFUSE, MyGL::TextureUsage::Diffuse, textures);
-				LoadMaterialTextures(material, aiTextureType::aiTextureType_SPECULAR, MyGL::TextureUsage::Specular, textures);
-				LoadMaterialTextures(material, aiTextureType::aiTextureType_NORMALS, MyGL::TextureUsage::Normal, textures);
+				LoadMaterialTextures(material, aiTextureType::aiTextureType_DIFFUSE, MyGL::TextureUsage::Diffuse, myMaterial);
+				LoadMaterialTextures(material, aiTextureType::aiTextureType_SPECULAR, MyGL::TextureUsage::Specular, myMaterial);
+				LoadMaterialTextures(material, aiTextureType::aiTextureType_NORMALS, MyGL::TextureUsage::Normal, myMaterial);
 			}
 
-			return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::move(textures));
+			return std::make_shared<Mesh>(std::move(vertices), std::move(indices), myMaterial);
 		}
 
-		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, std::vector<TexturePtr>& out)
+		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, MaterialPtr outMaterial)
 		{
 			unsigned nTextures = material->GetTextureCount(textureType);
 			aiString path;
@@ -112,7 +113,7 @@ namespace MyGL
 				TexturePtr texture = ResourceManager::Instance()->EnsureTexture(std::string("m:") + fullPath, fullPath);
 				texture->Usage = textureUsage;
 
-				out.push_back(texture);
+				outMaterial->SetTexture(texture, textureUsage);
 			}
 		}
 	};

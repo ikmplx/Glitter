@@ -4,13 +4,14 @@
 
 #include "Res/Texture.h"
 #include "Res/Shader.h"
+#include "Material.h"
 
 namespace MyGL
 {
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, std::vector<TexturePtr> textures)
+	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, MaterialPtr material)
 		: vertices(vertices)
 		, indices(indices)
-		, textures(textures)
+		, material(material)
 	{
 		glCreateVertexArrays(1, &_vao);
 		glCreateBuffers(1, &_vbo);
@@ -72,36 +73,7 @@ namespace MyGL
 		unsigned samplerN = 0;
 		
 		shader->Bind();
-
-		for (const auto& texture : textures) {
-			glActiveTexture(GL_TEXTURE0 + samplerN);
-			texture->Bind();
-
-			const char* usageName = "unknown";
-			unsigned usageN = 0;
-			if (texture->Usage == TextureUsage::Diffuse || texture->Usage == TextureUsage::None) {
-				usageName = "diffuse";
-				usageN = ++diffuseN;
-			}
-			else if (texture->Usage == TextureUsage::Specular) {
-				usageName = "specular";
-				usageN = ++specularN;
-			}
-			else if (texture->Usage == TextureUsage::Normal) {
-				usageName = "normal";
-				usageN = ++normalN;
-			}
-			else {
-				usageN = ++unknownN;
-			}
-
-			snprintf(uniformName, sizeof(uniformName), "texture_%s%d", usageName, usageN);
-			glUniform1i(shader->GetUniformLocation(uniformName), samplerN);
-
-			samplerN++;
-		}
-
-		glActiveTexture(GL_TEXTURE0);
+		material->Bind(shader);
 
 		glBindVertexArray(_vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -167,9 +139,7 @@ namespace MyGL
 			20, 23, 22
 		};
 
-		std::vector<TexturePtr> textures{ ResourceManager::Instance()->GetTexture("Awesome") };
-
-		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::move(textures));
+		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
 	}
 }
 

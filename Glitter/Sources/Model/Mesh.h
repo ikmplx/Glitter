@@ -12,7 +12,7 @@ namespace MyGL
 			glm::vec3 pos = glm::vec3(0.f);
 			glm::vec3 normal = glm::vec3(0.f);
 			glm::vec2 uv = glm::vec2(0.f);
-			glm::vec3 color = glm::vec3(0.f);
+			glm::vec3 color = glm::vec3(1.f);
 
 			glm::vec3 tangent = glm::vec3(0.f);
 			glm::vec3 bitangent = glm::vec3(0.f);
@@ -21,9 +21,9 @@ namespace MyGL
 		std::vector<Vertex> vertices;
 		std::vector<unsigned> indices;
 
-		std::vector<TexturePtr> textures;
+		MaterialPtr material;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, std::vector<TexturePtr> textures);
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, MaterialPtr material);
 		~Mesh();
 
 		void Draw(ShaderPtr shader);

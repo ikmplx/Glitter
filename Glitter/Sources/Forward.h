@@ -22,4 +22,9 @@ namespace MyGL
 	class Entity;
 	using EntityPtr = std::shared_ptr<Entity>;
 	using EntityWeakPtr = std::weak_ptr<Entity>;
+
+	class Material;
+	using MaterialPtr = std::shared_ptr<Material>;
+
+	enum class TextureUsage;
 }

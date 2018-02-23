@@ -1,3 +1,5 @@
+﻿// ¯\_(ツ)_/¯
+
 #pragma once
 
 #include "Forward.h"
