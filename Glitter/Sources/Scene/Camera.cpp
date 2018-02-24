@@ -41,6 +41,9 @@ namespace MyGL
 		_pitch -= dy * _mouseSensitivity;
 		_yaw -= dx * _mouseSensitivity;
 
+		_pitch = glm::mod(_pitch, glm::two_pi<float>());
+		_yaw = glm::mod(_yaw, glm::two_pi<float>());
+
 		RecalcQuat();
 	}
 
