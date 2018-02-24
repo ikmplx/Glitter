@@ -141,6 +141,11 @@ static void DrawBuffers()
 
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)mWidth / mHeight, 1.f, 100.f);
+	
+	MyGL::UboManager::SetMatrices(0, proj);
+	MyGL::UboManager::SetMatrices(1, view);
+	MyGL::UboManager::SetMatrices(2, proj * view);
+
 
 	//nanosuitEntity1->scale = nanosuitEntity2->scale = glm::vec3(pulseProgress);
 
@@ -153,8 +158,6 @@ static void DrawBuffers()
 
 	auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
 	shader->Bind();
-	shader->SetMatrix("view", view);
-	shader->SetMatrix("proj", proj);
 
 	scene->Draw(shader);
 }
@@ -193,6 +196,7 @@ int main()
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_RENDERER));
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+	MyGL::UboManager::Initialize();
 	MyGL::ResourceManager::Instance()->Initialize();
 
 	glViewport(0, 0, mWidth, mHeight);
@@ -231,7 +235,7 @@ int main()
 
 		DrawBuffers();
 
-		ImGui::SliderFloat("Rotate", &guyRotation, 0.f, glm::two_pi<float>());
+		// ImGui::SliderFloat("Rotate", &guyRotation, 0.f, glm::two_pi<float>());
 
 		ImGui::Render();
 
@@ -243,6 +247,7 @@ int main()
 	ImGui_ImplGlfwGL3_Shutdown();
 
 	MyGL::ResourceManager::Instance()->Deinitialize();
+	MyGL::UboManager::Deinitialize();
 
 	glfwTerminate();
 	return EXIT_SUCCESS;

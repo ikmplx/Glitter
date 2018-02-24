@@ -36,6 +36,44 @@ namespace {
 
 namespace MyGL
 {
+	namespace UboManager
+	{
+		constexpr GLuint BINDING_MATRICES = 0;
+
+		static GLuint uboMatrices;
+
+		void Initialize()
+		{
+			// Matrices
+			glGenBuffers(1, &uboMatrices);
+			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+			glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_MATRICES, uboMatrices, 0, 3 * sizeof(glm::mat4));
+		}
+
+		void SetMatrices(int matrixIndex, const glm::mat4& mat)
+		{
+			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+			glBufferSubData(GL_UNIFORM_BUFFER, matrixIndex * sizeof(glm::mat4), sizeof(glm::mat4), &mat);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
+		void Deinitialize()
+		{
+			glDeleteBuffers(1, &uboMatrices);
+		}
+
+		void SetupShader(GLuint shaderId)
+		{
+			GLuint uboIndex = glGetUniformBlockIndex(shaderId, "Matrices");
+			if (uboIndex != GL_INVALID_INDEX) {
+				glUniformBlockBinding(shaderId, uboIndex, BINDING_MATRICES);
+			}
+		}
+	}
+
+
 	Shader::Shader(const std::string& name, const std::string& vertFilename, const std::string& fragFilename)
 		: Resource(name, ResourceType::Shader)
 	{
@@ -57,6 +95,9 @@ namespace MyGL
 			GLchar infoLog[2048];
 			glGetProgramInfoLog(shaderProgram, 2048, NULL, infoLog);
 			std::cout << "Program link failed:\n" << infoLog << std::endl;
+		}
+		else {
+			UboManager::SetupShader(shaderProgram);
 		}
 
 		ID = shaderProgram;

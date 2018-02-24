@@ -8,13 +8,18 @@ layout (location = 3) in vec3 aColor;
 out vec2 vUv;
 out vec3 vColor;
 
-uniform mat4 proj;
-uniform mat4 view;
 uniform mat4 model;
+
+layout (std140) uniform Matrices
+{
+    mat4 proj;
+    mat4 view;
+	mat4 combined;
+};
 
 void main()
 {
-	gl_Position = proj * view * model * vec4(aPos, 1.0);
+	gl_Position = combined * model * vec4(aPos, 1.0);
 
 	vUv = aUv;
 	vColor = aColor;

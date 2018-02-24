@@ -4,6 +4,16 @@
 
 namespace MyGL
 {
+	namespace UboManager
+	{
+		void Initialize();
+		void Deinitialize();
+
+		void SetupShader(GLuint shaderId);
+
+		void SetMatrices(int matrixIndex, const glm::mat4& mat);
+	};
+
 	class Shader : public Resource
 	{
 	public:
