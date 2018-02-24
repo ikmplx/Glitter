@@ -4,6 +4,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "Utils.h"
 
 namespace MyGL
 {
@@ -34,12 +35,7 @@ namespace MyGL
 
 	size_t ResourceManager::ResourceHasher::operator()(const ResourceDescription & desc) const
 	{
-		size_t seed = 0;
-
-		seed = std::hash_value(desc.name) + (seed << 6) + (seed << 16) - seed;
-		seed = std::hash_value(desc.type) + (seed << 6) + (seed << 16) - seed;
-
-		return seed;
+		return Utils::HashCombine(desc.name, desc.type);
 	}
 
 
@@ -124,7 +120,7 @@ namespace MyGL
 	{
 		_resources[ResourceDescription{ res->GetType(), res->GetName() }] = res;
 
-#if 0
+#if 1
 		std::cout << "[ResourceManager] Hash status: ";
 		for (size_t i = 0; i < _resources.bucket_count(); i++) {
 			std::cout << _resources.bucket_size(i) << " ";

@@ -5,6 +5,7 @@
 #include "Res/Texture.h"
 #include "Mesh.h"
 #include "Scene/Scene.h"
+#include "Scene/Entity.h"
 #include "Material.h"
 
 // System Headers

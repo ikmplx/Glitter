@@ -23,6 +23,10 @@ namespace MyGL
 	using EntityPtr = std::shared_ptr<Entity>;
 	using EntityWeakPtr = std::weak_ptr<Entity>;
 
+	struct Component;
+	using ComponentPtr = std::shared_ptr<Component>;
+	using ComponentWeakPtr = std::weak_ptr<Component>;
+
 	class Material;
 	using MaterialPtr = std::shared_ptr<Material>;
 
