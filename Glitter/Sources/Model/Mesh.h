@@ -27,6 +27,9 @@ namespace MyGL
 		~Mesh();
 
 		void Draw(ShaderPtr shader);
+		void Draw();
+
+		GLuint GetVAO();
 
 	private:
 		GLuint _vao;
@@ -37,5 +40,6 @@ namespace MyGL
 
 	namespace Primitives {
 		MeshPtr CreateCube();
+		MeshPtr CreatePlane(float width, float height, float textureScale);
 	}
 }

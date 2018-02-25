@@ -10,6 +10,9 @@ namespace MyGL
 	class Texture;
 	using TexturePtr = std::shared_ptr<Texture>;
 
+	class Cubemap;
+	using CubemapPtr = std::shared_ptr<Cubemap>;
+
 	class Resource;
 	using ResourcePtr = std::shared_ptr<Resource>;
 

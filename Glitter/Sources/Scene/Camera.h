@@ -17,7 +17,7 @@ namespace MyGL
 			Backward, Forward
 		};
 
-		Camera(float speed = 6.f, float mouseSensitivity = 0.0015f);
+		Camera(float speed = 12.f, float mouseSensitivity = 0.0015f);
 		~Camera(); 
 
 		void SetPosition(glm::vec3 pos);

@@ -7,7 +7,8 @@ namespace MyGL
 	enum class ResourceType 
 	{
 		Texture,
-		Shader
+		Shader,
+		Cubemap
 	};
 
 	class Resource 
@@ -56,6 +57,8 @@ namespace MyGL
 		TexturePtr AddTexture(const std::string& name, const std::string& baseName);
 		TexturePtr GetTexture(const std::string & name);
 
+		CubemapPtr AddCubemap(const std::string& name, const std::string& baseName, const char* extension, std::vector<const char*> faces);
+		CubemapPtr GetCubemap(const std::string & name);
 
 	private:
 		void Add(ResourcePtr res);

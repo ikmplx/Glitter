@@ -56,9 +56,13 @@ namespace MyGL
 		auto res = _sInstance;
 
 		res->AddShader("test", "test");
+		res->AddShader("Skybox", "skybox");
 
 		res->AddTexture("Crate", "container.jpg");
 		res->AddTexture("Awesome", "awesomeface.png");
+		res->AddTexture("Wood", "wood.png");
+
+		res->AddCubemap("Skybox", "skybox/", ".png", {"right", "left", "top", "bottom", "front", "back"});
 	}
 
 	void ResourceManager::Deinitialize()
@@ -106,8 +110,6 @@ namespace MyGL
 	{
 		TexturePtr texture = std::make_shared<Texture>(name, std::string("Textures/") + baseName);
 		Add(std::static_pointer_cast<Texture>(texture));
-
-
 		return texture;
 	}
 
@@ -116,11 +118,23 @@ namespace MyGL
 		return std::static_pointer_cast<Texture>(Find(ResourceType::Texture, name));
 	}
 
+	CubemapPtr ResourceManager::AddCubemap(const std::string & name, const std::string& baseName, const char * extension, std::vector<const char*> faces)
+	{
+		CubemapPtr texture = std::make_shared<Cubemap>(name, (std::string("Textures/") + baseName).c_str(), extension, faces);
+		Add(std::static_pointer_cast<Cubemap>(texture));
+		return texture;
+	}
+
+	CubemapPtr ResourceManager::GetCubemap(const std::string & name)
+	{
+		return std::static_pointer_cast<Cubemap>(Find(ResourceType::Cubemap, name));
+	}
+
 	void ResourceManager::Add(ResourcePtr res)
 	{
 		_resources[ResourceDescription{ res->GetType(), res->GetName() }] = res;
 
-#if 1
+#if 0
 		std::cout << "[ResourceManager] Hash status: ";
 		for (size_t i = 0; i < _resources.bucket_count(); i++) {
 			std::cout << _resources.bucket_size(i) << " ";

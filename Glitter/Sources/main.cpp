@@ -22,10 +22,13 @@ static MyGL::EntityPtr nanosuitPrefab;
 static MyGL::EntityPtr towerPrefab;
 static MyGL::ScenePtr scene;
 
+static MyGL::EntityPtr floorEntity;
 static MyGL::EntityPtr centerEntity;
 static MyGL::EntityPtr nanosuitEntity1;
 static MyGL::EntityPtr nanosuitEntity2;
 static MyGL::EntityPtr towerEntity;
+
+static MyGL::MeshPtr skyboxCube;
 
 static bool isCursorInitialized;
 static float xCursor, yCursor;
@@ -129,9 +132,37 @@ static void PrepareBuffers()
 	towerEntity = towerPrefab->Clone();
 	towerEntity->position += glm::vec3(0, 0, -10);
 
+	floorEntity = scene->CreateEntity();
+	floorEntity->SetMesh(MyGL::Primitives::CreatePlane(100.f, 100.f, 0.1f));
+
 	centerEntity->AddChild(nanosuitEntity1);
 	centerEntity->AddChild(nanosuitEntity2);
 	centerEntity->AddChild(towerEntity);
+	centerEntity->AddChild(floorEntity);
+
+	skyboxCube = MyGL::Primitives::CreateCube();
+	skyboxCube->material = nullptr;
+}
+
+static void DrawSkybox() {
+	MyGL::CubemapPtr skyboxTexture = MyGL::ResourceManager::Instance()->GetCubemap("Skybox");
+	MyGL::ShaderPtr shader = MyGL::ResourceManager::Instance()->GetShader("Skybox");
+
+	glCullFace(GL_FRONT);
+	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
+
+	glActiveTexture(GL_TEXTURE0);
+	skyboxTexture->Bind();
+
+	shader->Bind();
+	shader->SetInt("sampler", 0);
+
+	skyboxCube->Draw();
+
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+	glCullFace(GL_BACK);
 }
 
 static void DrawBuffers()
@@ -160,6 +191,8 @@ static void DrawBuffers()
 	shader->Bind();
 
 	scene->Draw(shader);
+
+	DrawSkybox();
 }
 
 int main() 
@@ -210,6 +243,7 @@ int main()
 	PrepareBuffers();
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	ImGui_ImplGlfwGL3_Init(mWindow, false);
 

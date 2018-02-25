@@ -63,21 +63,24 @@ namespace MyGL
 
 	void Mesh::Draw(ShaderPtr shader)
 	{
-		static char uniformName[255];
-
-		unsigned specularN = 0;
-		unsigned diffuseN = 0;
-		unsigned normalN = 0;
-		unsigned unknownN = 0;
-
-		unsigned samplerN = 0;
-		
 		shader->Bind();
 		material->Bind(shader);
 
 		glBindVertexArray(_vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+	}
+
+	void Mesh::Draw()
+	{
+		glBindVertexArray(_vao);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
+
+	GLuint Mesh::GetVAO()
+	{
+		return _vao;
 	}
 
 
@@ -140,6 +143,31 @@ namespace MyGL
 		};
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
+	}
+
+
+	MeshPtr Primitives::CreatePlane(float width, float height, float textureScale)
+	{
+		std::vector<Mesh::Vertex> vertices;
+
+		auto AddVertex = [&vertices](float x, float y, float z, float u, float v, float nx, float ny, float nz) {
+			vertices.push_back({ glm::vec3(x, y, z), glm::vec3(nx, ny, nz), glm::vec2(u, v), glm::vec3(1.0), glm::vec3(), glm::vec3() });
+		};
+
+		float halfWidth = width * 0.5f;
+		float halfHeight = height * 0.5f;
+
+		AddVertex(-halfWidth, 0.f, -halfHeight, 0.f, 0.f, 0.f, 1.f, 0.f);
+		AddVertex(-halfWidth, 0.f, halfHeight, 0.f, height * textureScale, 0.f, 1.f, 0.f);
+		AddVertex(halfWidth,  0.f,  halfHeight, width * textureScale, height * textureScale, 0.f, 1.f, 0.f);
+		AddVertex(halfWidth,  0.f, -halfHeight, width * textureScale, 0.f, 0.f, 1.f, 0.f);
+
+		std::vector<unsigned> indices{
+			0, 1, 2,
+			0, 2, 3
+		};
+
+		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Wood")));
 	}
 }
 
