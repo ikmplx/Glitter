@@ -50,7 +50,8 @@ namespace MyGL
 		static void Deinitialize();
 		static ResourceManager* Instance();
 
-		ShaderPtr AddShader(const std::string& name, const std::string& baseName);
+		ShaderPtr AddShader(const std::string& name, const std::string& baseName, bool useGeometry = false);
+		ShaderPtr AddVPQuadShader(const std::string& name, const std::string& baseName);
 		ShaderPtr GetShader(const std::string & name);
 
 		TexturePtr EnsureTexture(const std::string& name, const std::string& path);

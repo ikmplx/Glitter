@@ -12,10 +12,15 @@ namespace MyGL
 		TestState();
 		~TestState();
 
+		virtual void Init() override;
+		virtual void Deinit() override;
+
 		virtual void Update(float dt) override;
 		virtual void Draw() override;
 
 	private:
+		void CreateFramebuffer();
+
 		void DrawSkybox();
 
 	private:
@@ -30,5 +35,11 @@ namespace MyGL
 		EntityPtr _towerEntity;
 
 		MeshPtr _skyboxCube;
+
+
+		GLuint _fbo;
+		GLuint _fboTexAtt;
+
+		GLuint _vpVao;
 	};
 }

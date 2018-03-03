@@ -17,7 +17,7 @@ namespace MyGL
 	class Shader : public Resource
 	{
 	public:
-		Shader(const std::string& name, const std::string& vertFilename, const std::string& fragFilename);
+		Shader(const std::string& name, const std::string& vertFilename, const std::string& fragFilename, const std::string& geomFilename = std::string());
 		~Shader();
 
 		// Use the program

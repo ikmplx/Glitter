@@ -12,9 +12,22 @@
 #include "Scene/Entity.h"
 #include "Scene/Camera.h"
 
+#include "Utils.h"
+
 namespace MyGL
 {
 	TestState::TestState()
+	{
+
+	}
+
+
+
+	TestState::~TestState()
+	{
+	}
+
+	void TestState::Init()
 	{
 		GetCamera().SetPosition(glm::vec3(0.f, 7.f, 37.f));
 
@@ -46,12 +59,13 @@ namespace MyGL
 
 		_skyboxCube = Primitives::CreateCube();
 		_skyboxCube->material = nullptr;
+
+		CreateFramebuffer();
 	}
 
-
-
-	TestState::~TestState()
+	void TestState::Deinit()
 	{
+		glDeleteFramebuffers(1, &_fbo);
 	}
 
 	void TestState::Update(float dt)
@@ -60,6 +74,14 @@ namespace MyGL
 
 	void TestState::Draw()
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
 		float constantProgress = (float)fmod(glfwGetTime(), 100.0) * 4.f;
 
@@ -76,6 +98,61 @@ namespace MyGL
 		_scene->Draw(shader);
 
 		DrawSkybox();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, _vpWidth, _vpHeight);
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+
+		glClearColor(1.f, 0.f, 1.f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glBindVertexArray(_vpVao);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _fboTexAtt);
+
+		ShaderPtr vpShader = ResourceManager::Instance()->GetShader("vpquad");
+		vpShader->Bind();
+		vpShader->SetInt("texture1", 0);
+
+		glDrawArrays(GL_POINTS, 0, 1);
+		glBindVertexArray(0);
+	}
+
+	void TestState::CreateFramebuffer()
+	{
+		// Framebuffer
+		int fbWidth = _vpWidth;
+		int fbHeight = _vpHeight;
+
+		glGenFramebuffers(1, &_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+		glGenTextures(1, &_fboTexAtt);
+		glBindTexture(GL_TEXTURE_2D, _fboTexAtt);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fbWidth, fbHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _fboTexAtt, 0);
+
+		GLuint depthAtt;
+		glGenTextures(1, &depthAtt);
+		glBindTexture(GL_TEXTURE_2D, depthAtt);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, fbWidth, fbHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAtt, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Viewport VAO
+		glGenVertexArrays(1, &_vpVao);
 	}
 
 	void TestState::DrawSkybox() {

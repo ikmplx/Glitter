@@ -17,5 +17,11 @@ namespace MyGL
 			size_t seed = HashCombine(rest...);
 			return std::hash<T>()(val) + (seed << 6) + (seed << 16) - seed;
 		}
+
+		void GlError(const char *file, int line);
+		void GlClearError();
 	}
 }
+
+#define GL_ERROR() ::MyGL::Utils::GlError(__FILE__, __LINE__)
+#define GL_CLEAR_ERROR() ::MyGL::Utils::GlClearError()

@@ -102,17 +102,6 @@ static void MyProcessInput(GLFWwindow* window)
 	}
 }
 
-
-static void PrepareBuffers()
-{
-
-}
-
-static void DrawBuffers()
-{
-
-}
-
 int main() 
 {
 	// Load GLFW and Create a Window
@@ -122,7 +111,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	// glfwWindowHint(GLFW_SAMPLES, 4);
 
 	auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
 
@@ -138,7 +127,7 @@ int main()
 	glfwMakeContextCurrent(mWindow);
 
 	// V-Sync
-	glfwSwapInterval(1);
+	//glfwSwapInterval(1);
 
 	gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress));
 
@@ -146,6 +135,7 @@ int main()
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VENDOR));
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_RENDERER));
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	// fprintf(stderr, "OpenGL %s\n", glGetString(GL_EXTENSIONS));
 
 	MyGL::UboManager::Initialize();
 	MyGL::ResourceManager::Instance()->Initialize();
@@ -159,6 +149,8 @@ int main()
 	glfwSetCursorPosCallback(mWindow, MyCursorPosCallback);
 
 	sCurrentState = std::make_unique<MyGL::TestState>();
+	sCurrentState->SetViewportSize(mWidth, mHeight);
+	sCurrentState->Init();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -174,6 +166,7 @@ int main()
 	} fpsCounter = { 0, lastTime, 0 };
 
 	double frameTimeLimit = 1.0 / 70.0;
+
 	double nextFrameTime = lastTime + frameTimeLimit;
 	double frameLimiterActive = 0.0;
 
@@ -236,6 +229,7 @@ int main()
 
 	ImGui_ImplGlfwGL3_Shutdown();
 
+	sCurrentState->Deinit();
 	sCurrentState.reset();
 
 	MyGL::ResourceManager::Instance()->Deinitialize();

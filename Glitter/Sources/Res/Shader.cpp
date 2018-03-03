@@ -14,6 +14,10 @@ namespace {
 
 	GLuint CreateShader(GLuint shaderType, const char* filename)
 	{
+		if (!filename || filename[0] == '\0') {
+			return 0;
+		}
+
 		GLuint shader = glCreateShader(shaderType);
 		std::string sourceContent = ReadFile(filename);
 		const char* sourceContentPtr = sourceContent.c_str();
@@ -74,18 +78,27 @@ namespace MyGL
 	}
 
 
-	Shader::Shader(const std::string& name, const std::string& vertFilename, const std::string& fragFilename)
+	Shader::Shader(const std::string& name, const std::string& vertFilename, const std::string& fragFilename, const std::string& geomFilename)
 		: Resource(name, ResourceType::Shader)
 	{
 		GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, vertFilename.c_str());
 		GLuint fragmentShader = CreateShader(GL_FRAGMENT_SHADER, fragFilename.c_str());
+		GLuint geometryShader = CreateShader(GL_GEOMETRY_SHADER, geomFilename.c_str());
 
 		GLuint shaderProgram = glCreateProgram();
 		glAttachShader(shaderProgram, vertexShader);
 		glAttachShader(shaderProgram, fragmentShader);
+		if (geometryShader) {
+			glAttachShader(shaderProgram, geometryShader);
+		}
+
 		glLinkProgram(shaderProgram);
+
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+		if (geometryShader) {
+			glDeleteShader(geometryShader);
+		}
 
 		GLint success;
 		glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);

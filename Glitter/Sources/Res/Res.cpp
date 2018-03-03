@@ -57,6 +57,7 @@ namespace MyGL
 
 		res->AddShader("test", "test");
 		res->AddShader("Skybox", "skybox");
+		res->AddVPQuadShader("vpquad", "vpquad");
 
 		res->AddTexture("Crate", "container.jpg");
 		res->AddTexture("Awesome", "awesomeface.png");
@@ -78,11 +79,31 @@ namespace MyGL
 		return _sInstance;
 	}
 
-	ShaderPtr ResourceManager::AddShader(const std::string& name, const std::string& baseName)
+	ShaderPtr ResourceManager::AddShader(const std::string& name, const std::string& baseName, bool useGeometry)
 	{
-		ShaderPtr shader = std::make_shared<Shader>(name, std::string("Shaders/") + baseName + std::string(".vert"), std::string("Shaders/") + baseName + std::string(".frag"));
+		std::string fragPath = std::string("Shaders/") + baseName + std::string(".frag");
+		std::string vertPath = std::string("Shaders/") + baseName + std::string(".vert");
+		std::string geomPath;
+
+		if (useGeometry) {
+			geomPath = std::string("Shaders/") + baseName + std::string(".geom");
+		}
+
+		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath, geomPath);
 		Add(std::static_pointer_cast<Resource>(shader));
 		return shader;
+	}
+
+	ShaderPtr ResourceManager::AddVPQuadShader(const std::string & name, const std::string & baseName)
+	{
+		std::string fragPath = std::string("Shaders/") + baseName + std::string(".frag");
+		std::string vertPath = "Shaders/vpquad.vert";
+		std::string geomPath = "Shaders/vpquad.geom";
+
+		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath, geomPath);
+		Add(std::static_pointer_cast<Resource>(shader));
+		return shader;
+
 	}
 
 	ShaderPtr ResourceManager::GetShader(const std::string & name)
