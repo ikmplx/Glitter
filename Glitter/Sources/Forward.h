@@ -33,5 +33,7 @@ namespace MyGL
 	class Material;
 	using MaterialPtr = std::shared_ptr<Material>;
 
+	class Camera;
+
 	enum class TextureUsage;
 }

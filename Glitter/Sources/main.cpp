@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <thread>
+
 #include "Res/Shader.h"
 #include "Res/Texture.h"
 #include "Model/Mesh.h"
@@ -8,27 +10,16 @@
 #include "Scene/Entity.h"
 #include "Scene/Camera.h"
 
+#include "GameState.h"
+#include "TestState.h"
+
 #include "imgui_impl_glfw_gl3.h"
 
 // Define Some Constants
 const int mWidth = 1280;
 const int mHeight = 800;
 
-static float guyRotation = 0.f;
-
-static MyGL::Camera camera;
-
-static MyGL::EntityPtr nanosuitPrefab;
-static MyGL::EntityPtr towerPrefab;
-static MyGL::ScenePtr scene;
-
-static MyGL::EntityPtr floorEntity;
-static MyGL::EntityPtr centerEntity;
-static MyGL::EntityPtr nanosuitEntity1;
-static MyGL::EntityPtr nanosuitEntity2;
-static MyGL::EntityPtr towerEntity;
-
-static MyGL::MeshPtr skyboxCube;
+static std::unique_ptr<MyGL::GameState> sCurrentState;
 
 static bool isCursorInitialized;
 static float xCursor, yCursor;
@@ -88,11 +79,13 @@ static void MyCursorPosCallback(GLFWwindow*, double x, double y)
 	xCursor = (float) x;
 	yCursor = (float) y;
 
-	camera.MouseMoved(dx, dy);
+	sCurrentState->GetCamera().MouseMoved(dx, dy);
 }
 
 static void MyProcessInput(GLFWwindow* window)
 {
+	auto& camera = sCurrentState->GetCamera();
+
 	if (!isImGuiActive) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			camera.Move(MyGL::Camera::MoveDirection::Forward, deltaTime);
@@ -112,87 +105,12 @@ static void MyProcessInput(GLFWwindow* window)
 
 static void PrepareBuffers()
 {
-	camera.SetPosition(glm::vec3(0.f, 7.f, 37.f));
 
-	nanosuitPrefab = MyGL::ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
-
-	towerPrefab = MyGL::ModelLoader::LoadModel("Models/vox/chr_sword.ply");
-	towerPrefab->rotation = glm::angleAxis(glm::radians(-90.f), glm::vec3(1, 0, 0));
-
-	scene = std::make_shared<MyGL::Scene>();
-
-	centerEntity = scene->CreateEntity();
-
-	nanosuitEntity1 = nanosuitPrefab->Clone();
-	nanosuitEntity2 = nanosuitPrefab->Clone();
-
-	nanosuitEntity1->position += glm::vec3(-10, 0, 0);
-	nanosuitEntity2->position += glm::vec3(10, 0, 0);
-
-	towerEntity = towerPrefab->Clone();
-	towerEntity->position += glm::vec3(0, 0, -10);
-
-	floorEntity = scene->CreateEntity();
-	floorEntity->SetMesh(MyGL::Primitives::CreatePlane(100.f, 100.f, 0.1f));
-
-	centerEntity->AddChild(nanosuitEntity1);
-	centerEntity->AddChild(nanosuitEntity2);
-	centerEntity->AddChild(towerEntity);
-	centerEntity->AddChild(floorEntity);
-
-	skyboxCube = MyGL::Primitives::CreateCube();
-	skyboxCube->material = nullptr;
-}
-
-static void DrawSkybox() {
-	MyGL::CubemapPtr skyboxTexture = MyGL::ResourceManager::Instance()->GetCubemap("Skybox");
-	MyGL::ShaderPtr shader = MyGL::ResourceManager::Instance()->GetShader("Skybox");
-
-	glCullFace(GL_FRONT);
-	glDepthMask(GL_FALSE);
-	glDepthFunc(GL_LEQUAL);
-
-	glActiveTexture(GL_TEXTURE0);
-	skyboxTexture->Bind();
-
-	shader->Bind();
-	shader->SetInt("sampler", 0);
-
-	skyboxCube->Draw();
-
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
-	glCullFace(GL_BACK);
 }
 
 static void DrawBuffers()
 {
-	float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
-	float constantProgress = (float) fmod(glfwGetTime(), 100.0) * 4.f;
 
-	glm::mat4 view = camera.GetViewMatrix();
-	glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)mWidth / mHeight, 1.f, 100.f);
-	
-	MyGL::UboManager::SetMatrices(0, proj);
-	MyGL::UboManager::SetMatrices(1, view);
-	MyGL::UboManager::SetMatrices(2, proj * view);
-
-
-	//nanosuitEntity1->scale = nanosuitEntity2->scale = glm::vec3(pulseProgress);
-
-	//centerEntity->rotation = glm::angleAxis(0.f, glm::vec3(1, 0, 0));
-
-	//centerEntity->rotation *= glm::angleAxis(constantProgress, glm::vec3(0, 1, 0));
-	//centerEntity->rotation *= glm::angleAxis(guyRotation, glm::vec3(1, 0, 0));
-
-	//centerEntity->scale = glm::vec3(pulseProgress);
-
-	auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
-	shader->Bind();
-
-	scene->Draw(shader);
-
-	DrawSkybox();
 }
 
 int main() 
@@ -240,7 +158,7 @@ int main()
 	glfwSetCharCallback(mWindow, MyCharCallback);
 	glfwSetCursorPosCallback(mWindow, MyCursorPosCallback);
 
-	PrepareBuffers();
+	sCurrentState = std::make_unique<MyGL::TestState>();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -249,11 +167,20 @@ int main()
 
 	double lastTime = glfwGetTime();
 
+	struct {
+		int frames;
+		double lastTime;
+		double lastFps;
+	} fpsCounter = { 0, lastTime, 0 };
+
+	double frameTimeLimit = 1.0 / 70.0;
+	double nextFrameTime = lastTime + frameTimeLimit;
+	double frameLimiterActive = 0.0;
+
 	// Rendering Loop
 	while (glfwWindowShouldClose(mWindow) == false) {
 		if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(mWindow, true);
-
 		double currentTime = glfwGetTime();
 		deltaTime = (float)(currentTime - lastTime);
 		lastTime = currentTime;
@@ -263,15 +190,44 @@ int main()
 		ImGui_ImplGlfwGL3_NewFrame();
 		glfwSetInputMode(mWindow, GLFW_CURSOR, !isImGuiActive ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
+		sCurrentState->SetViewportSize(mWidth, mHeight);
+		sCurrentState->Update(deltaTime);
+
 		// Background Fill Color
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		DrawBuffers();
+		sCurrentState->Draw();
 
-		// ImGui::SliderFloat("Rotate", &guyRotation, 0.f, glm::two_pi<float>());
+		// FPS
+		fpsCounter.frames++;
+		double fpsDelta = currentTime - fpsCounter.lastTime;
+		if (fpsDelta >= 1.f) {
+			fpsCounter.lastFps = fpsCounter.frames / fpsDelta;
+			fpsCounter.lastTime = currentTime;
+			fpsCounter.frames = 0;
+		}
+
+		ImGui::Text("FPS: %.2lf", fpsCounter.lastFps);
+		ImGui::Text("Frame limiter: %.2lf", frameLimiterActive);
 
 		ImGui::Render();
+
+		// FPS limiter
+		for (;;) {
+			double waitTime = nextFrameTime - glfwGetTime();
+
+			if (waitTime <= 0) {
+				break;
+			}
+
+			//if (waitTime > frameTimeLimit / 10.f) {
+				std::this_thread::sleep_for(std::chrono::microseconds((int)(waitTime * 1000000)));
+			//}
+			frameLimiterActive = glfwGetTime();
+		}
+
+		nextFrameTime += frameTimeLimit;
 
 		// Flip Buffers and Draw
 		glfwSwapBuffers(mWindow);
@@ -279,6 +235,8 @@ int main()
 	}
 
 	ImGui_ImplGlfwGL3_Shutdown();
+
+	sCurrentState.reset();
 
 	MyGL::ResourceManager::Instance()->Deinitialize();
 	MyGL::UboManager::Deinitialize();
