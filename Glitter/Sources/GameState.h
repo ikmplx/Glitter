@@ -25,5 +25,6 @@ namespace MyGL
 	protected:
 		std::unique_ptr<Camera> _camera;
 		int _vpWidth = 0, _vpHeight = 0;
+		GLuint _emptyVao;
 	};
 }

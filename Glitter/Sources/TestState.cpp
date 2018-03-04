@@ -57,8 +57,6 @@ namespace MyGL
 		_centerEntity->AddChild(_towerEntity);
 		_centerEntity->AddChild(_floorEntity);
 
-		_skyboxCube = Primitives::CreateCube();
-		_skyboxCube->material = nullptr;
 
 		CreateFramebuffer();
 	}
@@ -88,9 +86,18 @@ namespace MyGL
 		glm::mat4 view = GetCamera().GetViewMatrix();
 		glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)_vpWidth / _vpHeight, 1.f, 100.f);
 
-		MyGL::UboManager::SetMatrices(0, proj);
-		MyGL::UboManager::SetMatrices(1, view);
-		MyGL::UboManager::SetMatrices(2, proj * view);
+		{
+			glm::mat4 combined = proj * view;
+			glm::mat4 combinedNoDir = glm::mat4(glm::mat3(combined));
+			
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 0, proj);
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 1, view);
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 2, combined);
+
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 0, combinedNoDir);
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 1, glm::inverse(combined));
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 2, glm::inverse(combinedNoDir));
+		}
 
 		auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
 		shader->Bind();
@@ -108,7 +115,7 @@ namespace MyGL
 		glClearColor(1.f, 0.f, 1.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(_vpVao);
+		glBindVertexArray(_emptyVao);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _fboTexAtt);
@@ -150,16 +157,13 @@ namespace MyGL
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAtt, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// Viewport VAO
-		glGenVertexArrays(1, &_vpVao);
 	}
 
 	void TestState::DrawSkybox() {
 		MyGL::CubemapPtr skyboxTexture = MyGL::ResourceManager::Instance()->GetCubemap("Skybox");
 		MyGL::ShaderPtr shader = MyGL::ResourceManager::Instance()->GetShader("Skybox");
 
-		glCullFace(GL_FRONT);
+		//glCullFace(GL_FRONT);
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_LEQUAL);
 
@@ -169,10 +173,12 @@ namespace MyGL
 		shader->Bind();
 		shader->SetInt("sampler", 0);
 
-		_skyboxCube->Draw();
+		glBindVertexArray(_emptyVao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
 		glDepthMask(GL_TRUE);
-		glCullFace(GL_BACK);
+		//glCullFace(GL_BACK);
 	}
 }

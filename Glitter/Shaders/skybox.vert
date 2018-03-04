@@ -1,20 +1,22 @@
 #version 330 core
 
-layout (location = 0) in vec3 aPos;
-
-layout (std140) uniform Matrices
+layout (std140) uniform MatricesExt
 {
-    mat4 proj;
-    mat4 view;
-	mat4 combined;
+	mat4 combinedNoDir;
+	mat4 invCombined;
+	mat4 invCombinedNoDir;
 };
 
 out vec3 vUvw;
 
 void main()
 {
-	mat4 combinedNoTranslation = proj * mat4(mat3(view));
-	vec4 pos = combinedNoTranslation * vec4(aPos, 1.0);
-	gl_Position = pos.xyww;
-	vUvw = aPos;
+	vec2 pos;
+	pos.x = (gl_VertexID & 1) * 2.0 - 1.0;
+	pos.y = ((gl_VertexID & 2) >> 1) * 2.0 - 1.0;
+
+	vec4 dir = invCombinedNoDir * vec4(pos, 1.0, 1.0);
+
+	gl_Position = vec4(pos, 1.0, 1.0);
+	vUvw = dir.xyz / dir.w;
 }

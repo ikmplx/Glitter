@@ -6,12 +6,15 @@ namespace MyGL
 {
 	namespace UboManager
 	{
+		constexpr GLuint BINDING_MATRICES = 0;
+		constexpr GLuint BINDING_MATRICES_EXT = 1;
+
 		void Initialize();
 		void Deinitialize();
 
 		void SetupShader(GLuint shaderId);
 
-		void SetMatrices(int matrixIndex, const glm::mat4& mat);
+		void SetMatrix(GLuint binding, int matrixIndex, const glm::mat4& mat);
 	};
 
 	class Shader : public Resource

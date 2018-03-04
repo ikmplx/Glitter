@@ -10,10 +10,12 @@ namespace MyGL
 	GameState::GameState()
 		: _camera(std::make_unique<Camera>())
 	{
+		glGenVertexArrays(1, &_emptyVao);
 	}
 
 	GameState::~GameState()
 	{
+		glDeleteVertexArrays(1, &_emptyVao);
 	}
 
 	void GameState::Update(float dt)

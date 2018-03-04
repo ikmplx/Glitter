@@ -42,37 +42,50 @@ namespace MyGL
 {
 	namespace UboManager
 	{
-		constexpr GLuint BINDING_MATRICES = 0;
-
-		static GLuint uboMatrices;
+		static GLuint ubos[2];
 
 		void Initialize()
 		{
 			// Matrices
-			glGenBuffers(1, &uboMatrices);
-			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+			glGenBuffers(2, ubos);
+
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_MATRICES]);
 			glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
-			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_MATRICES, uboMatrices, 0, 3 * sizeof(glm::mat4));
+			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_MATRICES, ubos[BINDING_MATRICES], 0, 3 * sizeof(glm::mat4));
+
+			// MatricesExt
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_MATRICES_EXT]);
+			glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_MATRICES_EXT, ubos[BINDING_MATRICES_EXT], 0, 3 * sizeof(glm::mat4));
+
 		}
 
-		void SetMatrices(int matrixIndex, const glm::mat4& mat)
+		void SetMatrix(GLuint binding, int matrixIndex, const glm::mat4& mat)
 		{
-			glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[binding]);
 			glBufferSubData(GL_UNIFORM_BUFFER, matrixIndex * sizeof(glm::mat4), sizeof(glm::mat4), &mat);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}
 
 		void Deinitialize()
 		{
-			glDeleteBuffers(1, &uboMatrices);
+			glDeleteBuffers(2, ubos);
 		}
 
 		void SetupShader(GLuint shaderId)
 		{
+			// Matrices
 			GLuint uboIndex = glGetUniformBlockIndex(shaderId, "Matrices");
 			if (uboIndex != GL_INVALID_INDEX) {
 				glUniformBlockBinding(shaderId, uboIndex, BINDING_MATRICES);
+			}
+
+			// MatricesExt
+			uboIndex = glGetUniformBlockIndex(shaderId, "MatricesExt");
+			if (uboIndex != GL_INVALID_INDEX) {
+				glUniformBlockBinding(shaderId, uboIndex, BINDING_MATRICES_EXT);
 			}
 		}
 	}

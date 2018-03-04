@@ -34,9 +34,6 @@ namespace MyGL
 		EntityPtr _nanosuitEntity2;
 		EntityPtr _towerEntity;
 
-		MeshPtr _skyboxCube;
-
-
 		GLuint _fbo;
 		GLuint _fboTexAtt;
 

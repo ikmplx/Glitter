@@ -127,7 +127,7 @@ int main()
 	glfwMakeContextCurrent(mWindow);
 
 	// V-Sync
-	//glfwSwapInterval(1);
+	glfwSwapInterval(1);
 
 	gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress));
 
