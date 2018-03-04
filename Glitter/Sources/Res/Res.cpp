@@ -98,7 +98,7 @@ namespace MyGL
 	{
 		std::string fragPath = std::string("Shaders/") + baseName + std::string(".frag");
 		std::string vertPath = "Shaders/vpquad.vert";
-		std::string geomPath = "Shaders/vpquad.geom";
+		std::string geomPath;
 
 		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath, geomPath);
 		Add(std::static_pointer_cast<Resource>(shader));

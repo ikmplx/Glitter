@@ -84,7 +84,7 @@ namespace MyGL
 		float constantProgress = (float)fmod(glfwGetTime(), 100.0) * 4.f;
 
 		glm::mat4 view = GetCamera().GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)_vpWidth / _vpHeight, 1.f, 100.f);
+		glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)_vpWidth / _vpHeight, 1.f, 500.f);
 
 		{
 			glm::mat4 combined = proj * view;
@@ -124,7 +124,7 @@ namespace MyGL
 		vpShader->Bind();
 		vpShader->SetInt("texture1", 0);
 
-		glDrawArrays(GL_POINTS, 0, 1);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	}
 

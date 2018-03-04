@@ -11,9 +11,8 @@ out vec3 vUvw;
 
 void main()
 {
-	vec2 pos;
-	pos.x = (gl_VertexID & 1) * 2.0 - 1.0;
-	pos.y = ((gl_VertexID & 2) >> 1) * 2.0 - 1.0;
+	vec2 pos = vec2(gl_VertexID & 1, (gl_VertexID & 2) >> 1);
+	pos = pos * 2.0 - 1.0;
 
 	vec4 dir = invCombinedNoDir * vec4(pos, 1.0, 1.0);
 
