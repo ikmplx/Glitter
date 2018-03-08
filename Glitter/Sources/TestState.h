@@ -34,9 +34,7 @@ namespace MyGL
 		EntityPtr _nanosuitEntity2;
 		EntityPtr _towerEntity;
 
-		GLuint _fbo;
-		GLuint _fboTexAtt;
-
-		GLuint _vpVao;
+		FramebufferPtr _mainFramebuffer;
+		AttachmentPtr _mainAttachment;
 	};
 }

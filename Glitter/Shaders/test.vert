@@ -5,8 +5,11 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUv;
 layout (location = 3) in vec3 aColor;
 
-out vec2 vUv;
-out vec3 vColor;
+out VS_OUT {
+	vec2 uv;
+	vec3 color;
+	vec3 pos;
+} vsOut;
 
 uniform mat4 model;
 
@@ -21,6 +24,9 @@ void main()
 {
 	gl_Position = combined * model * vec4(aPos, 1.0);
 
-	vUv = aUv;
-	vColor = aColor;
+	vsOut.uv = aUv;
+	vsOut.color = aColor;
+
+	//vsOut.color = (mat4(mat3(model)) * vec4(aNormal, 1.0)).xyz;
+	//vsOut.color = vsOut.color * 0.5 + 0.5;
 }

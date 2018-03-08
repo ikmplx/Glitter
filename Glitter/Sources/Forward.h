@@ -4,6 +4,12 @@
 
 namespace MyGL
 {
+	class Attachment;
+	using AttachmentPtr = std::shared_ptr<Attachment>;
+
+	class Framebuffer;
+	using FramebufferPtr = std::shared_ptr<Framebuffer>;
+
 	class Shader;
 	using ShaderPtr = std::shared_ptr<Shader>;
 

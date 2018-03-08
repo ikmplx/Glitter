@@ -11,6 +11,7 @@
 #include "Scene/Scene.h"
 #include "Scene/Entity.h"
 #include "Scene/Camera.h"
+#include "Framebuffer.h"
 
 #include "Utils.h"
 
@@ -18,7 +19,6 @@ namespace MyGL
 {
 	TestState::TestState()
 	{
-
 	}
 
 
@@ -63,7 +63,6 @@ namespace MyGL
 
 	void TestState::Deinit()
 	{
-		glDeleteFramebuffers(1, &_fbo);
 	}
 
 	void TestState::Update(float dt)
@@ -72,14 +71,6 @@ namespace MyGL
 
 	void TestState::Draw()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
 		float constantProgress = (float)fmod(glfwGetTime(), 100.0) * 4.f;
 
@@ -89,7 +80,7 @@ namespace MyGL
 		{
 			glm::mat4 combined = proj * view;
 			glm::mat4 combinedNoDir = glm::mat4(glm::mat3(combined));
-			
+
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 0, proj);
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 1, view);
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 2, combined);
@@ -99,6 +90,15 @@ namespace MyGL
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 2, glm::inverse(combinedNoDir));
 		}
 
+
+		_mainFramebuffer->BeginRender();
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
 		shader->Bind();
 
@@ -106,8 +106,7 @@ namespace MyGL
 
 		DrawSkybox();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, _vpWidth, _vpHeight);
+		_mainFramebuffer->EndRender();
 
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
@@ -118,7 +117,7 @@ namespace MyGL
 		glBindVertexArray(_emptyVao);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _fboTexAtt);
+		_mainAttachment->Bind();
 
 		ShaderPtr vpShader = ResourceManager::Instance()->GetShader("vpquad");
 		vpShader->Bind();
@@ -130,33 +129,11 @@ namespace MyGL
 
 	void TestState::CreateFramebuffer()
 	{
-		// Framebuffer
-		int fbWidth = _vpWidth;
-		int fbHeight = _vpHeight;
+		_mainAttachment = std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::RGB, false);
+		_mainFramebuffer = std::make_shared<Framebuffer>();
 
-		glGenFramebuffers(1, &_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
-		glGenTextures(1, &_fboTexAtt);
-		glBindTexture(GL_TEXTURE_2D, _fboTexAtt);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fbWidth, fbHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _fboTexAtt, 0);
-
-		GLuint depthAtt;
-		glGenTextures(1, &depthAtt);
-		glBindTexture(GL_TEXTURE_2D, depthAtt);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, fbWidth, fbHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAtt, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_mainFramebuffer->AttachColor(_mainAttachment);
+		_mainFramebuffer->AttachDepth(std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::Depth, false));
 	}
 
 	void TestState::DrawSkybox() {
