@@ -10,6 +10,9 @@ namespace MyGL
 	class Framebuffer;
 	using FramebufferPtr = std::shared_ptr<Framebuffer>;
 
+	class DeferredRenderer;
+	using DeferredRendererPtr = std::shared_ptr<DeferredRenderer>;
+
 	class Shader;
 	using ShaderPtr = std::shared_ptr<Shader>;
 

@@ -73,6 +73,11 @@ namespace MyGL
 		_mesh = mesh;
 	}
 
+	MeshPtr Entity::GetMesh()
+	{
+		return _mesh;
+	}
+
 	void Entity::Draw(ShaderPtr shader)
 	{
 		if (_mesh) {

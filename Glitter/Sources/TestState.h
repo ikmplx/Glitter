@@ -22,6 +22,7 @@ namespace MyGL
 		void CreateFramebuffer();
 
 		void DrawSkybox();
+		void DrawFullscreen();
 
 	private:
 		EntityPtr _nanosuitPrefab;
@@ -34,7 +35,6 @@ namespace MyGL
 		EntityPtr _nanosuitEntity2;
 		EntityPtr _towerEntity;
 
-		FramebufferPtr _mainFramebuffer;
-		AttachmentPtr _mainAttachment;
+		DeferredRendererPtr _deferredRenderer;
 	};
 }

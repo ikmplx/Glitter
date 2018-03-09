@@ -55,9 +55,13 @@ namespace MyGL
 
 		auto res = _sInstance;
 
-		res->AddShader("test", "test");
+		res->AddShader("Pass1", "pass1");
 		res->AddShader("Skybox", "skybox");
 		res->AddVPQuadShader("vpquad", "vpquad");
+
+		res->AddVPQuadShader("Pass2", "pass2");
+		res->AddVPQuadShader("Pass2Ambient", "pass2ambient");
+		res->AddVPQuadShader("Pass2Directional", "pass2directional");
 
 		res->AddTexture("Crate", "container.jpg");
 		res->AddTexture("Awesome", "awesomeface.png");

@@ -38,6 +38,8 @@ namespace MyGL
 		void AttachColor(AttachmentPtr colorAttachment);
 		void AttachDepth(AttachmentPtr depthAttachment);
 
+		void BlitDepthToMainFramebuffer(int width, int height);
+
 	private:
 		GLuint _framebuffer;
 

@@ -30,6 +30,7 @@ namespace MyGL
 		std::shared_ptr<T> FindComponent();
 
 		void SetMesh(MeshPtr mesh);
+		MeshPtr GetMesh();
 
 		void Draw(ShaderPtr shader);
 

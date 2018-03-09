@@ -8,6 +8,7 @@ namespace MyGL
 	{
 		constexpr GLuint BINDING_MATRICES = 0;
 		constexpr GLuint BINDING_MATRICES_EXT = 1;
+		constexpr GLuint BINDING_VECTORS = 2;
 
 		void Initialize();
 		void Deinitialize();
@@ -15,6 +16,7 @@ namespace MyGL
 		void SetupShader(GLuint shaderId);
 
 		void SetMatrix(GLuint binding, int matrixIndex, const glm::mat4& mat);
+		void SetVector(GLuint binding, int vectorIndex, const glm::vec4& vector);
 	};
 
 	class Shader : public Resource

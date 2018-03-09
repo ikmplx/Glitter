@@ -42,12 +42,12 @@ namespace MyGL
 {
 	namespace UboManager
 	{
-		static GLuint ubos[2];
+		static GLuint ubos[3];
 
 		void Initialize()
 		{
 			// Matrices
-			glGenBuffers(2, ubos);
+			glGenBuffers(3, ubos);
 
 			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_MATRICES]);
 			glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
@@ -60,12 +60,25 @@ namespace MyGL
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_MATRICES_EXT, ubos[BINDING_MATRICES_EXT], 0, 3 * sizeof(glm::mat4));
 
+			// Vectors
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_VECTORS]);
+			glBufferData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_VECTORS, ubos[BINDING_VECTORS], 0, 1 * sizeof(glm::vec4));
+
 		}
 
 		void SetMatrix(GLuint binding, int matrixIndex, const glm::mat4& mat)
 		{
 			glBindBuffer(GL_UNIFORM_BUFFER, ubos[binding]);
 			glBufferSubData(GL_UNIFORM_BUFFER, matrixIndex * sizeof(glm::mat4), sizeof(glm::mat4), &mat);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
+		void SetVector(GLuint binding, int vectorIndex, const glm::vec4& vector)
+		{
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[binding]);
+			glBufferSubData(GL_UNIFORM_BUFFER, vectorIndex * sizeof(glm::vec4), sizeof(glm::vec4), &vector);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}
 
@@ -86,6 +99,12 @@ namespace MyGL
 			uboIndex = glGetUniformBlockIndex(shaderId, "MatricesExt");
 			if (uboIndex != GL_INVALID_INDEX) {
 				glUniformBlockBinding(shaderId, uboIndex, BINDING_MATRICES_EXT);
+			}
+
+			// Vectors
+			uboIndex = glGetUniformBlockIndex(shaderId, "Vectors");
+			if (uboIndex != GL_INVALID_INDEX) {
+				glUniformBlockBinding(shaderId, uboIndex, BINDING_VECTORS);
 			}
 		}
 	}

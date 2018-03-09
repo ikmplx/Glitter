@@ -3,6 +3,7 @@
 #include "stdafx.h"
 
 #include "Framebuffer.h"
+#include "Utils.h"
 
 namespace MyGL
 {
@@ -117,4 +118,16 @@ namespace MyGL
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAttachment->GetTexture(), 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+
+	void Framebuffer::BlitDepthToMainFramebuffer(int width, int height)
+	{
+		glEnable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 }

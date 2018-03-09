@@ -18,4 +18,5 @@ void main()
 
 	gl_Position = vec4(pos, 1.0, 1.0);
 	vUvw = dir.xyz / dir.w;
+	vUvw.z = -vUvw.z;
 }

@@ -20,6 +20,7 @@ namespace MyGL
 		TexturePtr diffuse;
 		TexturePtr specular;
 		TexturePtr normal;
+		float specularBase = 1.0;
 	};
 	using MaterialPtr = std::shared_ptr<Material>;
 }

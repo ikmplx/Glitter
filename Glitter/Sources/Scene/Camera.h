@@ -26,6 +26,7 @@ namespace MyGL
 		void MouseMoved(float dx, float dy);
 
 		glm::mat4 GetViewMatrix() const;
+		glm::vec3 GetPosition() const;
 
 	private:
 		void RecalcQuat();

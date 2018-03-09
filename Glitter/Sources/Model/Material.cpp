@@ -39,35 +39,37 @@ namespace MyGL
 		if (diffuse) {
 			glActiveTexture(GL_TEXTURE0 + iSampler);
 			diffuse->Bind();
-			glUniform1i(shader->GetUniformLocation("texture_diffuse1"), iSampler);
-			glUniform1i(shader->GetUniformLocation("has_diffuse1"), true);
+			glUniform1i(shader->GetUniformLocation("textureDiffuse1"), iSampler);
+			glUniform1i(shader->GetUniformLocation("hasDiffuse1"), true);
 			iSampler++;
 		}
 		else {
-			glUniform1i(shader->GetUniformLocation("has_diffuse1"), false);
+			glUniform1i(shader->GetUniformLocation("hasDiffuse1"), false);
 		}
 
 		if (normal) {
 			glActiveTexture(GL_TEXTURE0 + iSampler);
 			normal->Bind();
-			glUniform1i(shader->GetUniformLocation("texture_normal1"), iSampler);
-			glUniform1i(shader->GetUniformLocation("has_normal1"), true);
+			glUniform1i(shader->GetUniformLocation("textureNormal1"), iSampler);
+			glUniform1i(shader->GetUniformLocation("hasNormal1"), true);
 			iSampler++;
 		}
 		else {
-			glUniform1i(shader->GetUniformLocation("has_normal1"), false);
+			glUniform1i(shader->GetUniformLocation("hasNormal1"), false);
 		}
 
 		if (specular) {
 			glActiveTexture(GL_TEXTURE0 + iSampler);
 			specular->Bind();
-			glUniform1i(shader->GetUniformLocation("specular_specular1"), iSampler);
-			glUniform1i(shader->GetUniformLocation("has_specular1"), true);
+			glUniform1i(shader->GetUniformLocation("specularSpecular1"), iSampler);
+			glUniform1i(shader->GetUniformLocation("hasSpecular1"), true);
 			iSampler++;
 		}
 		else {
-			glUniform1i(shader->GetUniformLocation("has_specular1"), false);
+			glUniform1i(shader->GetUniformLocation("hasSpecular1"), false);
 		}
+
+		shader->SetFloat("specularBase", specularBase);
 
 		glActiveTexture(GL_TEXTURE0);
 	}

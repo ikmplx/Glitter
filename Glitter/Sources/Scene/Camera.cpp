@@ -53,6 +53,11 @@ namespace MyGL
 		return mat;
 	}
 
+	glm::vec3 Camera::GetPosition() const
+	{
+		return _position;
+	}
+
 	void Camera::RecalcQuat()
 	{
 		_rotation = glm::angleAxis(_yaw, glm::vec3(0.f, 1.f, 0.f)) * glm::angleAxis(_pitch, glm::vec3(1.f, 0.f, 0.f));

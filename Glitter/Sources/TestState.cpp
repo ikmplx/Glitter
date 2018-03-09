@@ -12,6 +12,8 @@
 #include "Scene/Entity.h"
 #include "Scene/Camera.h"
 #include "Framebuffer.h"
+#include "DeferredRenderer.h"
+#include "Model/Material.h"
 
 #include "Utils.h"
 
@@ -35,6 +37,11 @@ namespace MyGL
 
 		_towerPrefab = ModelLoader::LoadModel("Models/vox/chr_sword.ply");
 		_towerPrefab->rotation = glm::angleAxis(glm::radians(-90.f), glm::vec3(1, 0, 0));
+		_towerPrefab->Traverse([](Entity& entity) {
+			if (entity.GetMesh()) {
+				entity.GetMesh()->material->specularBase = 0.5f;
+			}
+		});
 
 		_scene = std::make_shared<MyGL::Scene>();
 
@@ -46,19 +53,25 @@ namespace MyGL
 		_nanosuitEntity1->position += glm::vec3(-10, 0, 0);
 		_nanosuitEntity2->position += glm::vec3(10, 0, 0);
 
+		_nanosuitEntity1->rotation = glm::angleAxis(glm::radians(35.f), glm::vec3(0, 1, 0));
+		_nanosuitEntity2->rotation = glm::angleAxis(glm::radians(-35.f), glm::vec3(0, 1, 0));
+
+		// _nanosuitEntity2->scale = glm::vec3(1.f, 5.f, 1.f);
+
 		_towerEntity = _towerPrefab->Clone();
 		_towerEntity->position += glm::vec3(0, 0, -10);
 
 		_floorEntity = _scene->CreateEntity();
-		_floorEntity->SetMesh(Primitives::CreatePlane(100.f, 100.f, 0.1f));
+		auto floorPlane = Primitives::CreatePlane(100.f, 100.f, 0.1f);
+		floorPlane->material->specularBase = 0.3f;
+		_floorEntity->SetMesh(floorPlane);
 
 		_centerEntity->AddChild(_nanosuitEntity1);
 		_centerEntity->AddChild(_nanosuitEntity2);
 		_centerEntity->AddChild(_towerEntity);
 		_centerEntity->AddChild(_floorEntity);
 
-
-		CreateFramebuffer();
+		_deferredRenderer = std::make_shared<DeferredRenderer>(_vpWidth, _vpHeight);
 	}
 
 	void TestState::Deinit()
@@ -88,59 +101,67 @@ namespace MyGL
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 0, combinedNoDir);
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 1, glm::inverse(combined));
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 2, glm::inverse(combinedNoDir));
+
+			MyGL::UboManager::SetVector(MyGL::UboManager::BINDING_VECTORS, 0, glm::vec4(GetCamera().GetPosition(), 0.f));
 		}
 
+		_deferredRenderer->BeginPass1();
 
-		_mainFramebuffer->BeginRender();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		auto shader = MyGL::ResourceManager::Instance()->GetShader("test");
+		auto shader = MyGL::ResourceManager::Instance()->GetShader("Pass1");
 		shader->Bind();
 
 		_scene->Draw(shader);
 
-		DrawSkybox();
+		_deferredRenderer->EndPass1();
 
-		_mainFramebuffer->EndRender();
 
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
-		glClearColor(1.f, 0.f, 1.f, 1.0f);
+		glClearColor(0.f, 0.f, 0.f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(_emptyVao);
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE);
 
-		glActiveTexture(GL_TEXTURE0);
-		_mainAttachment->Bind();
+		// Ambient
+		ShaderPtr ambientShader = ResourceManager::Instance()->GetShader("Pass2Ambient");
+		ambientShader->Bind();
+		ambientShader->SetVec3("ambientLight.color", glm::vec3(0.15f));
+		_deferredRenderer->BindColorAttachments(ambientShader);
+		DrawFullscreen();
 
-		ShaderPtr vpShader = ResourceManager::Instance()->GetShader("vpquad");
-		vpShader->Bind();
-		vpShader->SetInt("texture1", 0);
+		// Directional
+		ShaderPtr dirShader = ResourceManager::Instance()->GetShader("Pass2Directional");
+		dirShader->Bind();
 
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		static glm::vec3 lightDir(0.2f, -1.f, -1.f);
+
+		ImGui::SliderFloat3("Light", &lightDir.r, -1.f, 1.f);
+
+		dirShader->SetVec3("dirLight.color", glm::vec3(0.5f, 0.65f, 0.5f));
+		dirShader->SetVec3("dirLight.direction", lightDir);
+		dirShader->SetFloat("dirLight.ambient", 0.f);
+
+		_deferredRenderer->BindColorAttachments(dirShader);
+		DrawFullscreen();
+
+		glDisable(GL_BLEND);
+
+		// Forward
+		_deferredRenderer->GetFramebufferPass1()->BlitDepthToMainFramebuffer(_vpWidth, _vpHeight);
+		DrawSkybox();
 	}
 
 	void TestState::CreateFramebuffer()
 	{
-		_mainAttachment = std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::RGB, false);
-		_mainFramebuffer = std::make_shared<Framebuffer>();
-
-		_mainFramebuffer->AttachColor(_mainAttachment);
-		_mainFramebuffer->AttachDepth(std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::Depth, false));
 	}
 
 	void TestState::DrawSkybox() {
 		MyGL::CubemapPtr skyboxTexture = MyGL::ResourceManager::Instance()->GetCubemap("Skybox");
 		MyGL::ShaderPtr shader = MyGL::ResourceManager::Instance()->GetShader("Skybox");
 
-		//glCullFace(GL_FRONT);
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_LEQUAL);
 
@@ -156,6 +177,12 @@ namespace MyGL
 
 		glDepthFunc(GL_LESS);
 		glDepthMask(GL_TRUE);
-		//glCullFace(GL_BACK);
+	}
+
+	void TestState::DrawFullscreen()
+	{
+		glBindVertexArray(_emptyVao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 	}
 }
