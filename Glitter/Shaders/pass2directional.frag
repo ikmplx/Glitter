@@ -15,6 +15,8 @@ struct DirLight
 };
 uniform DirLight dirLight;
 
+uniform int enableBlinn = 0;
+
 layout (std140) uniform Vectors
 {
 	vec3 cameraPos;
@@ -41,8 +43,15 @@ void main()
 	
 	// Specular
 	vec3 viewDir = normalize(cameraPos - position);
-	vec3 reflectDir = reflect(-lightDir, normal);
-	float specularIntencity = pow(max(0.0, dot(viewDir, reflectDir)), shininess);
+	float specularIntencity = 0.0;
+
+	if (enableBlinn == 0) {
+		vec3 reflectDir = reflect(-lightDir, normal);
+		specularIntencity = pow(max(0.0, dot(viewDir, reflectDir)), shininess);
+	} else {
+		vec3 halfwayDir = normalize(lightDir + viewDir);
+		specularIntencity = pow(max(0.0, dot(normal, halfwayDir)), shininess * 3.5);
+	}
 	vec3 specular = vec3(spec * specularIntencity) * dirLight.color;
 	
 	FragColor = vec4(diffuse + ambient + specular, 1.0);

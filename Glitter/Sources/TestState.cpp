@@ -137,12 +137,15 @@ namespace MyGL
 		dirShader->Bind();
 
 		static glm::vec3 lightDir(0.2f, -1.f, -1.f);
+		static bool enableBlinn = true;
 
-		ImGui::SliderFloat3("Light", &lightDir.r, -1.f, 1.f);
+		ImGui::SliderFloat3("Light dir", &lightDir.r, -1.f, 1.f);
+		ImGui::Checkbox("Blinn", &enableBlinn);
 
 		dirShader->SetVec3("dirLight.color", glm::vec3(0.5f, 0.65f, 0.5f));
 		dirShader->SetVec3("dirLight.direction", lightDir);
 		dirShader->SetFloat("dirLight.ambient", 0.f);
+		dirShader->SetInt("enableBlinn", enableBlinn);
 
 		_deferredRenderer->BindColorAttachments(dirShader);
 		DrawFullscreen();
