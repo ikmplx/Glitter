@@ -16,6 +16,7 @@ uniform bool hasSpecular1;
 uniform sampler2D textureSpecular1;
 
 uniform float specularBase;
+uniform float gamma;
 
 layout (location = 0) out vec4 gAlbedoSpecular;
 layout (location = 1) out vec3 gNormal;
@@ -23,11 +24,13 @@ layout (location = 2) out vec3 gPosition;
 
 void main()
 {
-	vec3 texColor = vsIn.color;
+	vec3 gammaVec = vec3(gamma);
+
+	vec3 texColor = pow(vsIn.color, gammaVec);
 	float spec = specularBase;
 
 	if (hasDiffuse1) {
-		texColor *= texture(textureDiffuse1, vsIn.uv).rgb;
+		texColor *= pow(texture(textureDiffuse1, vsIn.uv).rgb, gammaVec);
 	}
 	
 	if (hasSpecular1) {

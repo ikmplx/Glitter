@@ -13,7 +13,7 @@ namespace MyGL
 		: _width(width)
 		, _height(height)
 	{
-		_gAlbedoSpecular = std::make_shared<Attachment>(width, height, Attachment::Type::RGBA, false);
+		_gAlbedoSpecular = std::make_shared<Attachment>(width, height, Attachment::Type::RGBA, true);
 		_gNormal = std::make_shared<Attachment>(width, height, Attachment::Type::RGB, true);
 		_gPosition = std::make_shared<Attachment>(width, height, Attachment::Type::RGB, true);
 		_gDepth = std::make_shared<Attachment>(width, height, Attachment::Type::Depth, false);

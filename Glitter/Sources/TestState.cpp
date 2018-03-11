@@ -136,7 +136,6 @@ namespace MyGL
 		ShaderPtr ambientShader = ResourceManager::Instance()->GetShader("Pass2Ambient");
 		ambientShader->Bind();
 		ambientShader->SetVec3("ambientLight.color", Gamma(glm::vec3(0.15f)));
-		ambientShader->SetFloat("gamma", _gamma);
 
 		_deferredRenderer->BindColorAttachments(ambientShader);
 		DrawFullscreen();
@@ -155,7 +154,6 @@ namespace MyGL
 		dirShader->SetVec3("dirLight.direction", lightDir);
 		dirShader->SetFloat("dirLight.ambient", 0.f);
 		dirShader->SetInt("enableBlinn", enableBlinn);
-		dirShader->SetFloat("gamma", _gamma);
 
 		_deferredRenderer->BindColorAttachments(dirShader);
 		DrawFullscreen();
@@ -220,7 +218,6 @@ namespace MyGL
 
 	void TestState::DrawFullscreen()
 	{
-		glEnable(GL_CULL_FACE);
 		glBindVertexArray(_emptyVao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
