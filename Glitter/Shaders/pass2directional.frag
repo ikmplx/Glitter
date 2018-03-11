@@ -22,13 +22,15 @@ layout (std140) uniform Vectors
 	vec3 cameraPos;
 };
 
+uniform float gamma;
+
 void main()
 {
 	vec3 normal = normalize(texture(gNormal, vUv).xyz);
 	vec4 texColor = texture(gAlbedoSpecular, vUv);
 	vec3 position = texture(gPosition, vUv).xyz;
 
-	vec3 albedo = texColor.rgb;
+	vec3 albedo = pow(texColor.rgb, vec3(gamma));
 	float spec = texColor.a;
 	float shininess = 32.0;
 

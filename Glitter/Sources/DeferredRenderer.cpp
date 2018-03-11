@@ -36,6 +36,7 @@ namespace MyGL
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -58,6 +59,16 @@ namespace MyGL
 	const FramebufferPtr & DeferredRenderer::GetFramebufferPass1()
 	{
 		return _framebufferPass1;
+	}
+
+	const AttachmentPtr & DeferredRenderer::GetAlbedoSpecular()
+	{
+		return _gAlbedoSpecular;
+	}
+
+	const AttachmentPtr & DeferredRenderer::GetDepth()
+	{
+		return _gDepth;
 	}
 
 	void DeferredRenderer::BindColorAttachment(ShaderPtr shader, const char* name, AttachmentPtr attachment, int index)

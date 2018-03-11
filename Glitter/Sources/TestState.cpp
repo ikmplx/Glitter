@@ -72,6 +72,9 @@ namespace MyGL
 		_centerEntity->AddChild(_floorEntity);
 
 		_deferredRenderer = std::make_shared<DeferredRenderer>(_vpWidth, _vpHeight);
+		_framebufferPass2 = std::make_shared<Framebuffer>();
+		_framebufferPass2->AttachColor(_colorPass2 = std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::RGB, true));
+		_framebufferPass2->AttachDepth(_deferredRenderer->GetDepth());
 	}
 
 	void TestState::Deinit()
@@ -105,30 +108,36 @@ namespace MyGL
 			MyGL::UboManager::SetVector(MyGL::UboManager::BINDING_VECTORS, 0, glm::vec4(GetCamera().GetPosition(), 0.f));
 		}
 
+		ImGui::SliderFloat("Gamma", &_gamma, 1.f, 2.4f);
+
+		// Pass 1
 		_deferredRenderer->BeginPass1();
 
 		auto shader = MyGL::ResourceManager::Instance()->GetShader("Pass1");
 		shader->Bind();
-
+		shader->SetFloat("gamma", _gamma);
 		_scene->Draw(shader);
 
 		_deferredRenderer->EndPass1();
 
-
+		// Pass 2
+		_framebufferPass2->BeginRender();
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE);
 
 		glClearColor(0.f, 0.f, 0.f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
-
 		// Ambient
 		ShaderPtr ambientShader = ResourceManager::Instance()->GetShader("Pass2Ambient");
 		ambientShader->Bind();
-		ambientShader->SetVec3("ambientLight.color", glm::vec3(0.15f));
+		ambientShader->SetVec3("ambientLight.color", Gamma(glm::vec3(0.15f)));
+		ambientShader->SetFloat("gamma", _gamma);
+
 		_deferredRenderer->BindColorAttachments(ambientShader);
 		DrawFullscreen();
 
@@ -142,19 +151,45 @@ namespace MyGL
 		ImGui::SliderFloat3("Light dir", &lightDir.r, -1.f, 1.f);
 		ImGui::Checkbox("Blinn", &enableBlinn);
 
-		dirShader->SetVec3("dirLight.color", glm::vec3(0.5f, 0.65f, 0.5f));
+		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.7f, 0.8f, 0.7f)));
 		dirShader->SetVec3("dirLight.direction", lightDir);
 		dirShader->SetFloat("dirLight.ambient", 0.f);
 		dirShader->SetInt("enableBlinn", enableBlinn);
+		dirShader->SetFloat("gamma", _gamma);
 
 		_deferredRenderer->BindColorAttachments(dirShader);
 		DrawFullscreen();
 
 		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
 
 		// Forward
-		_deferredRenderer->GetFramebufferPass1()->BlitDepthToMainFramebuffer(_vpWidth, _vpHeight);
 		DrawSkybox();
+
+		_framebufferPass2->EndRender();
+
+		if (_gamma > 1.f) {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			glDisable(GL_DEPTH_TEST);
+			glDisable(GL_BLEND);
+
+			ShaderPtr gammaShader = ResourceManager::Instance()->GetShader("Gamma");
+			gammaShader->Bind();
+			gammaShader->SetFloat("gamma", _gamma);
+
+			glActiveTexture(GL_TEXTURE0);
+			_colorPass2->Bind();
+			gammaShader->SetInt("texture1", 0);
+
+			DrawFullscreen();
+		}
+		else {
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebufferPass2->GetId());
+			glBlitFramebuffer(0, 0, _vpWidth, _vpHeight, 0, 0, _vpWidth, _vpHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
 	}
 
 	void TestState::CreateFramebuffer()
@@ -173,6 +208,7 @@ namespace MyGL
 
 		shader->Bind();
 		shader->SetInt("sampler", 0);
+		shader->SetFloat("gamma", _gamma);
 
 		glBindVertexArray(_emptyVao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -184,8 +220,14 @@ namespace MyGL
 
 	void TestState::DrawFullscreen()
 	{
+		glEnable(GL_CULL_FACE);
 		glBindVertexArray(_emptyVao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
+	}
+
+	glm::vec3 TestState::Gamma(const glm::vec3 & color)
+	{
+		return glm::pow(color, glm::vec3(_gamma));
 	}
 }

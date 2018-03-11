@@ -18,6 +18,8 @@ namespace MyGL
 		void BindColorAttachments(ShaderPtr shader);
 
 		const FramebufferPtr& GetFramebufferPass1();
+		const AttachmentPtr& GetAlbedoSpecular();
+		const AttachmentPtr& GetDepth();
 
 	private:
 		void BindColorAttachment(ShaderPtr shader, const char* name, AttachmentPtr attachment, int index);

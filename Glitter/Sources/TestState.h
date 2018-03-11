@@ -23,8 +23,11 @@ namespace MyGL
 
 		void DrawSkybox();
 		void DrawFullscreen();
+		glm::vec3 Gamma(const glm::vec3& color);
 
 	private:
+		float _gamma = 1.0;
+
 		EntityPtr _nanosuitPrefab;
 		EntityPtr _towerPrefab;
 		ScenePtr _scene;
@@ -36,5 +39,8 @@ namespace MyGL
 		EntityPtr _towerEntity;
 
 		DeferredRendererPtr _deferredRenderer;
+
+		FramebufferPtr _framebufferPass2;
+		AttachmentPtr _colorPass2;
 	};
 }

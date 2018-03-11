@@ -11,9 +11,12 @@ struct AmbientLight
 };
 uniform AmbientLight ambientLight;
 
+uniform float gamma;
+
 void main()
 {
-	vec3 texColor = texture(gAlbedoSpecular, vUv).rgb;
+	vec3 texColor = pow(texture(gAlbedoSpecular, vUv).rgb, vec3(gamma));
 	vec3 ambient = texColor * ambientLight.color;
+	
 	FragColor = vec4(ambient, 1.0);
 } 

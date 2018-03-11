@@ -39,6 +39,7 @@ namespace MyGL
 		void AttachDepth(AttachmentPtr depthAttachment);
 
 		void BlitDepthToMainFramebuffer(int width, int height);
+		GLuint GetId() const;
 
 	private:
 		GLuint _framebuffer;

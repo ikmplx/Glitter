@@ -21,7 +21,7 @@ namespace MyGL
 			filter = GL_NEAREST;
 		}
 		else if (type == Type::RGB) {
-			filter = GL_LINEAR;
+			filter = GL_NEAREST;
 			dataFormat = GL_RGB;
 
 			if (highPrecision) {
@@ -34,7 +34,7 @@ namespace MyGL
 			}
 		}
 		else if (type == Type::RGBA) {
-			filter = GL_LINEAR;
+			filter = GL_NEAREST;
 			dataFormat = GL_RGBA;
 
 			if (highPrecision) {
@@ -121,13 +121,17 @@ namespace MyGL
 
 	void Framebuffer::BlitDepthToMainFramebuffer(int width, int height)
 	{
-		glEnable(GL_DEPTH_TEST);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	GLuint Framebuffer::GetId() const
+	{
+		return _framebuffer;
 	}
 
 }

@@ -31,7 +31,7 @@ namespace {
 		{
 			GLchar infoLog[2048];
 			glGetShaderInfoLog(shader, 2048, NULL, infoLog);
-			std::cout << "Shader compile failed:\n" << infoLog << std::endl;
+			std::cout << "Shader compile failed: " << filename << ":\n" << infoLog << std::endl;
 		}
 
 		return shader;

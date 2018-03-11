@@ -62,6 +62,7 @@ namespace MyGL
 		res->AddVPQuadShader("Pass2", "pass2");
 		res->AddVPQuadShader("Pass2Ambient", "pass2ambient");
 		res->AddVPQuadShader("Pass2Directional", "pass2directional");
+		res->AddVPQuadShader("Gamma", "gamma");
 
 		res->AddTexture("Crate", "container.jpg");
 		res->AddTexture("Awesome", "awesomeface.png");
