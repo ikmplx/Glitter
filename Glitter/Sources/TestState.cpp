@@ -150,7 +150,7 @@ namespace MyGL
 		ImGui::SliderFloat3("Light dir", &lightDir.r, -1.f, 1.f);
 		ImGui::Checkbox("Blinn", &enableBlinn);
 
-		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.7f, 0.8f, 0.7f)));
+		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.7f, 0.7f, 0.7f)));
 		dirShader->SetVec3("dirLight.direction", lightDir);
 		dirShader->SetFloat("dirLight.ambient", 0.f);
 		dirShader->SetInt("enableBlinn", enableBlinn);
