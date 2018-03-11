@@ -4,12 +4,43 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace {
 	std::string ReadFile(const char* filename)
 	{
 		std::ifstream in(filename);
 		return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+	}
+
+	std::string ReadShaderFile(const char* filename)
+	{
+		static const char importLine[] = "@include ";
+
+		std::ifstream in(filename);
+
+		std::ostringstream out;
+
+		int nLine = 0;
+		std::string line;
+		while (std::getline(in, line)) {
+			nLine++;
+
+			if (line.find(importLine, 0) == 0) {
+				std::string includeName = "Shaders/Include/" + line.substr(sizeof(importLine) - 1) + ".glsl";
+				std::string includeContent = ReadFile(includeName.c_str());
+
+				out << "// begin included from " << includeName << '\n';
+				out << includeContent << '\n';
+				out << "// end included from " << includeName << '\n';
+				out << "#line " << (nLine + 1) << "\n";
+			}
+			else {
+				out << line << '\n';
+			}
+		}
+
+		return out.str();
 	}
 
 	GLuint CreateShader(GLuint shaderType, const char* filename)
@@ -19,7 +50,7 @@ namespace {
 		}
 
 		GLuint shader = glCreateShader(shaderType);
-		std::string sourceContent = ReadFile(filename);
+		std::string sourceContent = ReadShaderFile(filename);
 		const char* sourceContentPtr = sourceContent.c_str();
 		glShaderSource(shader, 1, &sourceContentPtr, nullptr);
 		glCompileShader(shader);

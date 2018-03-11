@@ -7,6 +7,8 @@ uniform sampler2D gAlbedoSpecular;
 uniform sampler2D gNormal;
 uniform sampler2D gPosition;
 
+@include VectorsUbo
+
 struct DirLight
 {
 	vec3 color;
@@ -16,11 +18,6 @@ struct DirLight
 uniform DirLight dirLight;
 
 uniform int enableBlinn = 0;
-
-layout (std140) uniform Vectors
-{
-	vec3 cameraPos;
-};
 
 void main()
 {

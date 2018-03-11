@@ -26,7 +26,7 @@ namespace MyGL
 		glm::vec3 Gamma(const glm::vec3& color);
 
 	private:
-		float _gamma = 1.0;
+		float _gamma = 2.2f;
 
 		EntityPtr _nanosuitPrefab;
 		EntityPtr _towerPrefab;

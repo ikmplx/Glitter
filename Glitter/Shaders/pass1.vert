@@ -14,12 +14,7 @@ out VS_OUT {
 
 uniform mat4 model;
 
-layout (std140) uniform Matrices
-{
-	mat4 proj;
-	mat4 view;
-	mat4 combined;
-};
+@include MatricesUbo
 
 void main()
 {
