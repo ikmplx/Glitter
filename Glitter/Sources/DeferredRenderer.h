@@ -29,7 +29,6 @@ namespace MyGL
 
 		AttachmentPtr _gAlbedoSpecular;
 		AttachmentPtr _gNormal;
-		AttachmentPtr _gPosition;
 		AttachmentPtr _gDepth;
 
 		FramebufferPtr _framebufferPass1;

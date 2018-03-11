@@ -5,9 +5,12 @@ out vec4 FragColor;
 
 uniform sampler2D gAlbedoSpecular;
 uniform sampler2D gNormal;
-uniform sampler2D gPosition;
+uniform sampler2D gDepth;
 
 @include VectorsUbo
+@include MatricesExtUbo
+
+@include Utils
 
 struct DirLight
 {
@@ -23,7 +26,8 @@ void main()
 {
 	vec3 normal = normalize(texture(gNormal, vUv).xyz);
 	vec4 texColor = texture(gAlbedoSpecular, vUv);
-	vec3 position = texture(gPosition, vUv).xyz;
+	float depth = texture(gDepth, vUv).r;
+	vec3 position = DepthToPosition(depth, vUv);
 
 	vec3 albedo = texColor.rgb;
 	float spec = texColor.a;

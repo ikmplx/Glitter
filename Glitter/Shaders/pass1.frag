@@ -20,7 +20,6 @@ uniform float gamma;
 
 layout (location = 0) out vec4 gAlbedoSpecular;
 layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec3 gPosition;
 
 void main()
 {
@@ -40,5 +39,4 @@ void main()
 	
 	gAlbedoSpecular = vec4(texColor, spec);
 	gNormal = vsIn.normal;
-	gPosition = vsIn.pos;
 } 

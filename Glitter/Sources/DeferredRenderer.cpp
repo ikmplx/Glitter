@@ -15,14 +15,12 @@ namespace MyGL
 	{
 		_gAlbedoSpecular = std::make_shared<Attachment>(width, height, Attachment::Type::RGBA, true);
 		_gNormal = std::make_shared<Attachment>(width, height, Attachment::Type::RGB, true);
-		_gPosition = std::make_shared<Attachment>(width, height, Attachment::Type::RGB, true);
 		_gDepth = std::make_shared<Attachment>(width, height, Attachment::Type::Depth, false);
 
 		_framebufferPass1 = std::make_shared<Framebuffer>();
 
 		_framebufferPass1->AttachColor(_gAlbedoSpecular);
 		_framebufferPass1->AttachColor(_gNormal);
-		_framebufferPass1->AttachColor(_gPosition);
 		_framebufferPass1->AttachDepth(_gDepth);
 	}
 
@@ -51,7 +49,7 @@ namespace MyGL
 	{
 		BindColorAttachment(shader, "gAlbedoSpecular", _gAlbedoSpecular, 0);
 		BindColorAttachment(shader, "gNormal", _gNormal, 1);
-		BindColorAttachment(shader, "gPosition", _gPosition, 2);
+		BindColorAttachment(shader, "gDepth", _gDepth, 2);
 
 		glActiveTexture(GL_TEXTURE0);
 	}
