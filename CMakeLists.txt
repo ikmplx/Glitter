@@ -5,15 +5,25 @@ project(Glitter)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# GLFW
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(Glitter/Vendor/glfw)
 
+# Assimp
 option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 option(ASSIMP_BUILD_SAMPLES OFF)
 option(ASSIMP_BUILD_TESTS OFF)
 add_subdirectory(Glitter/Vendor/assimp)
+
+# Bullet
+option(BUILD_BULLET2_DEMOS OFF)
+option(BUILD_CPU_DEMOS OFF)
+option(BUILD_EXTRAS OFF)
+option(BUILD_OPENGL3_DEMOS OFF)
+option(BUILD_UNIT_TESTS OFF)
+add_subdirectory(Glitter/Vendor/bullet)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
@@ -33,6 +43,8 @@ include_directories(Glitter/Sources/
                     Glitter/Vendor/glfw/include/
                     Glitter/Vendor/glm/
                     Glitter/Vendor/stb/
+                    
+                    Glitter/Vendor/bullet/src/
 
 					Glitter/Vendor/imgui/
 					Glitter/Vendor/imgui_impl/
@@ -102,6 +114,8 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${VENDORS_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} assimp glfw
-                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
+                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES}
+                      BulletDynamics BulletCollision LinearMath
+                      )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Glitter")

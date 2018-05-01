@@ -21,3 +21,6 @@
 [submodule "Glitter/Vendor/imgui"]
 	path = Glitter/Vendor/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "Glitter/Vendor/bullet"]
+	path = Glitter/Vendor/bullet
+	url = https://github.com/bulletphysics/bullet3.git
