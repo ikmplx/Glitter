@@ -17,7 +17,7 @@ namespace MyGL
 		template <typename Fun>
 		void Traverse(Fun fun);
 
-		void CalcGlobalTransform();
+		const glm::mat4& GetGlobalTransform() const;
 		EntityPtr Clone();
 
 		EntityPtr CreateChild();
@@ -34,9 +34,13 @@ namespace MyGL
 
 		void Draw(ShaderPtr shader);
 
+		void InvalidateTransform();
+
 	private:
 		void AddComponent(ComponentPtr component);
 		ComponentPtr FindComponent(const std::type_info& typeInfo);
+
+		void UpdateGlobalTransform() const;
 
 	public:
 		glm::quat rotation;
@@ -44,18 +48,15 @@ namespace MyGL
 		glm::vec3 scale;
 
 	private:
+		EntityWeakPtr _parent;
+		std::vector<EntityPtr> _children;
+
 		MeshPtr _mesh;
 
 		std::vector<ComponentPtr> _components;
 
-		std::vector<EntityPtr> _children;
-		EntityWeakPtr _parent;
-
-		glm::mat4 _globalTransform;
-
-		glm::quat _globalRotation;
-		glm::vec3 _globalPosition;
-		glm::vec3 _globalScale;
+		mutable glm::mat4 _globalTransform;
+		mutable bool _isGlobalTransformNeedUpdate = true;
 	};
 
 	template<typename Fun>

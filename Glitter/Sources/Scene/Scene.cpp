@@ -29,7 +29,6 @@ namespace MyGL
 	void Scene::Draw(ShaderPtr shader)
 	{
 		_rootEntity->Traverse([&shader](Entity& entity) {
-			entity.CalcGlobalTransform();
 			entity.Draw(shader);
 		});
 	}

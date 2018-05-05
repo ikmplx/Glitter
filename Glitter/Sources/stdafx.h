@@ -12,6 +12,9 @@
 
 #include "imgui.h"
 
+// Bullet
+#include <btBulletDynamicsCommon.h>
+
 // Standard Headers
 #include <cstdio>
 #include <cstdlib>

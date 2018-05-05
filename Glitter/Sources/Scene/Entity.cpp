@@ -17,23 +17,31 @@ namespace MyGL
 
 	Entity::~Entity() = default;
 
-	void Entity::CalcGlobalTransform()
+	void Entity::UpdateGlobalTransform() const
 	{
-		glm::mat4 identity(1);
+		if (!_isGlobalTransformNeedUpdate) {
+			return;
+		}
+
+		_globalTransform = glm::mat4(1.f);
 
 		EntityPtr parentEntity = _parent.lock();
 		if (parentEntity) {
-			_globalScale = parentEntity->_globalScale * scale;
-			_globalRotation = parentEntity->_globalRotation * rotation;
-			_globalPosition = parentEntity->_globalPosition + parentEntity->rotation * position * parentEntity->scale;
-		}
-		else {
-			_globalRotation = rotation;
-			_globalScale = scale;
-			_globalPosition = position;
+			parentEntity->UpdateGlobalTransform();
+			_globalTransform = parentEntity->_globalTransform;
 		}
 
-		_globalTransform = glm::translate(identity, _globalPosition) * glm::mat4_cast(_globalRotation) * glm::scale(identity, _globalScale);
+		_globalTransform = glm::translate(_globalTransform, position);
+		_globalTransform *= glm::mat4_cast(rotation);
+		_globalTransform = glm::scale(_globalTransform, scale);
+
+		_isGlobalTransformNeedUpdate = false;
+	}
+
+	const glm::mat4& Entity::GetGlobalTransform() const
+	{
+		UpdateGlobalTransform();
+		return _globalTransform;
 	}
 
 	EntityPtr Entity::Clone()
@@ -81,8 +89,16 @@ namespace MyGL
 	void Entity::Draw(ShaderPtr shader)
 	{
 		if (_mesh) {
-			shader->SetMatrix("model", _globalTransform);
+			shader->SetMatrix("model", GetGlobalTransform());
 			_mesh->Draw(shader);
+		}
+	}
+
+	void Entity::InvalidateTransform()
+	{
+		_isGlobalTransformNeedUpdate = true;
+		for (auto& child : _children) {
+			child->InvalidateTransform();
 		}
 	}
 

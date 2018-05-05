@@ -90,6 +90,10 @@ namespace MyGL
 		float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
 		float constantProgress = (float)fmod(glfwGetTime(), 100.0) * 4.f;
 
+		// _centerEntity->position = glm::vec3(0.f, 0.f, -constantProgress * 10.f);
+		// _centerEntity->rotation = glm::angleAxis(constantProgress / 2.f, glm::vec3(0, 1, 0));
+		// _centerEntity->InvalidateTransform();
+
 		glm::mat4 view = GetCamera().GetViewMatrix();
 		glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)_vpWidth / _vpHeight, 1.f, 500.f);
 
