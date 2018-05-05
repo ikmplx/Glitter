@@ -40,7 +40,7 @@ namespace MyGL
 		void AddComponent(ComponentPtr component);
 		ComponentPtr FindComponent(const std::type_info& typeInfo);
 
-		void UpdateGlobalTransform() const;
+		void UpdateGlobalTransform();
 
 	public:
 		glm::quat rotation;
@@ -55,8 +55,8 @@ namespace MyGL
 
 		std::vector<ComponentPtr> _components;
 
-		mutable glm::mat4 _globalTransform;
-		mutable bool _isGlobalTransformNeedUpdate = true;
+		glm::mat4 _globalTransform;
+		bool _isGlobalTransformNeedUpdate = true;
 	};
 
 	template<typename Fun>

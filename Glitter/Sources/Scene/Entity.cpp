@@ -17,7 +17,7 @@ namespace MyGL
 
 	Entity::~Entity() = default;
 
-	void Entity::UpdateGlobalTransform() const
+	void Entity::UpdateGlobalTransform()
 	{
 		if (!_isGlobalTransformNeedUpdate) {
 			return;
@@ -40,7 +40,6 @@ namespace MyGL
 
 	const glm::mat4& Entity::GetGlobalTransform() const
 	{
-		UpdateGlobalTransform();
 		return _globalTransform;
 	}
 
@@ -89,6 +88,7 @@ namespace MyGL
 	void Entity::Draw(ShaderPtr shader)
 	{
 		if (_mesh) {
+			UpdateGlobalTransform();
 			shader->SetMatrix("model", GetGlobalTransform());
 			_mesh->Draw(shader);
 		}
