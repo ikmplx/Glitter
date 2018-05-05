@@ -8,6 +8,7 @@ namespace MyGL
 {
 	class Entity : public std::enable_shared_from_this<Entity>
 	{
+		friend class RigidBody;
 		friend class Scene;
 
 	public:
@@ -18,6 +19,7 @@ namespace MyGL
 		void Traverse(Fun fun);
 
 		const glm::mat4& GetGlobalTransform() const;
+
 		EntityPtr Clone();
 
 		EntityPtr CreateChild();
@@ -31,6 +33,8 @@ namespace MyGL
 
 		void SetMesh(MeshPtr mesh);
 		MeshPtr GetMesh();
+
+		void SetRigidBody(RigidBodyPtr rigidBody);
 
 		void Draw(ShaderPtr shader);
 
@@ -57,6 +61,8 @@ namespace MyGL
 
 		glm::mat4 _globalTransform;
 		bool _isGlobalTransformNeedUpdate = true;
+
+		RigidBodyPtr _rigidBody;
 	};
 
 	template<typename Fun>

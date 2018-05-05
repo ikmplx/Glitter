@@ -5,6 +5,7 @@
 #include "Res/Shader.h"
 #include "Model/Mesh.h"
 #include "Component.h"
+#include "Physics.h"
 
 namespace MyGL
 {
@@ -19,7 +20,7 @@ namespace MyGL
 
 	void Entity::UpdateGlobalTransform()
 	{
-		if (!_isGlobalTransformNeedUpdate) {
+		if (!_isGlobalTransformNeedUpdate || (_rigidBody != nullptr && _rigidBody->IsPhysicsTransform())) {
 			return;
 		}
 
@@ -83,6 +84,11 @@ namespace MyGL
 	MeshPtr Entity::GetMesh()
 	{
 		return _mesh;
+	}
+
+	void Entity::SetRigidBody(RigidBodyPtr rigidBody)
+	{
+		_rigidBody = rigidBody;
 	}
 
 	void Entity::Draw(ShaderPtr shader)

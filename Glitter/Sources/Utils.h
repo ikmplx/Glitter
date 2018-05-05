@@ -20,8 +20,12 @@ namespace MyGL
 
 		void GlError(const char *file, int line);
 		void GlClearError();
+
+		void Assert(bool assertion);
 	}
 }
 
 #define GL_ERROR() ::MyGL::Utils::GlError(__FILE__, __LINE__)
 #define GL_CLEAR_ERROR() ::MyGL::Utils::GlClearError()
+
+#define MyAssert(x) MyGL::Utils::Assert(x)

@@ -35,3 +35,14 @@ void MyGL::Utils::GlClearError()
 	while ((errorCode = glGetError()) != GL_NO_ERROR)
 		;
 }
+
+#if defined _MSC_VER
+#include <intrin.h>
+void MyGL::Utils::Assert(bool assertion)
+{
+	if (!assertion) {
+		__debugbreak();
+	}
+}
+
+#endif

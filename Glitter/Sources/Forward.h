@@ -42,6 +42,10 @@ namespace MyGL
 	class Material;
 	using MaterialPtr = std::shared_ptr<Material>;
 
+	class RigidBody;
+	using RigidBodyPtr = std::shared_ptr<RigidBody>;
+	using RigidBodyWeakPtr = std::weak_ptr<RigidBody>;
+
 	class Camera;
 
 	enum class TextureUsage;

@@ -14,6 +14,7 @@
 #include "Framebuffer.h"
 #include "DeferredRenderer.h"
 #include "Model/Material.h"
+#include "Physics.h"
 
 #include "Utils.h"
 
@@ -27,6 +28,39 @@ namespace MyGL
 
 	TestState::~TestState()
 	{
+	}
+
+	void TestState::CreatePhysicObjects()
+	{
+		// Plane
+		_floorEntity = _scene->CreateEntity();
+		_scene->AddEntity(_floorEntity);
+
+		auto floorPlaneMesh = Primitives::CreatePlane(100.f, 100.f, 0.1f);
+		floorPlaneMesh->material->specularBase = 0.3f;
+		_floorEntity->SetMesh(floorPlaneMesh);
+
+		btBoxShape* floorShape = new btBoxShape(btVector3(50.f, 0.1f, 50.f));
+		RigidBodyPtr floorBody = std::make_shared<RigidBody>(_floorEntity, floorShape, 0.f);
+		_floorEntity->SetRigidBody(floorBody);
+		Physics::Instance()->AddRigidBody(floorBody);
+
+		// Box
+		btBoxShape* boxShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+		for (int i = 0; i < 100; i++) {
+			auto boxEntity = _scene->CreateEntity();
+			_scene->AddEntity(boxEntity);
+
+			auto boxMesh = Primitives::CreateCube();
+			boxEntity->SetMesh(boxMesh);
+
+			RigidBodyPtr boxBody = std::make_shared<RigidBody>(boxEntity, boxShape, 1.f);
+			boxEntity->SetRigidBody(boxBody);
+			Physics::Instance()->AddRigidBody(boxBody);
+
+			boxEntity->position = glm::vec3(0.f, 10.f + i * 1.5f, 12.f);
+			boxEntity->rotation = glm::angleAxis(1.1f + i, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
+		}
 	}
 
 	void TestState::Init()
@@ -61,28 +95,27 @@ namespace MyGL
 		_towerEntity = _towerPrefab->Clone();
 		_towerEntity->position += glm::vec3(0, 0, -10);
 
-		_floorEntity = _scene->CreateEntity();
-		auto floorPlane = Primitives::CreatePlane(100.f, 100.f, 0.1f);
-		floorPlane->material->specularBase = 0.3f;
-		_floorEntity->SetMesh(floorPlane);
-
 		_centerEntity->AddChild(_nanosuitEntity1);
 		_centerEntity->AddChild(_nanosuitEntity2);
 		_centerEntity->AddChild(_towerEntity);
-		_centerEntity->AddChild(_floorEntity);
 
 		_deferredRenderer = std::make_shared<DeferredRenderer>(_vpWidth, _vpHeight);
 		_framebufferPass2 = std::make_shared<Framebuffer>();
 		_framebufferPass2->AttachColor(_colorPass2 = std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::RGB, true));
 		_framebufferPass2->AttachDepth(_deferredRenderer->GetDepth());
+
+		Physics::Initialize();
+		CreatePhysicObjects();
 	}
 
 	void TestState::Deinit()
 	{
+		Physics::Deinitialize();
 	}
 
 	void TestState::Update(float dt)
 	{
+		Physics::Instance()->Update(dt);
 	}
 
 	void TestState::Draw()

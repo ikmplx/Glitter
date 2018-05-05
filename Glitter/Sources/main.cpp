@@ -9,6 +9,7 @@
 #include "Scene/Scene.h"
 #include "Scene/Entity.h"
 #include "Scene/Camera.h"
+#include "Utils.h"
 
 #include "GameState.h"
 #include "TestState.h"

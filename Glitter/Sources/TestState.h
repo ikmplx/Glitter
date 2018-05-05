@@ -20,6 +20,7 @@ namespace MyGL
 
 	private:
 		void CreateFramebuffer();
+		void CreatePhysicObjects();
 
 		void DrawSkybox();
 		void DrawFullscreen();
@@ -28,11 +29,13 @@ namespace MyGL
 	private:
 		float _gamma = 2.2f;
 
+		EntityPtr _floorEntity;
+		std::vector<EntityPtr> _boxes;
+
 		EntityPtr _nanosuitPrefab;
 		EntityPtr _towerPrefab;
 		ScenePtr _scene;
 
-		EntityPtr _floorEntity;
 		EntityPtr _centerEntity;
 		EntityPtr _nanosuitEntity1;
 		EntityPtr _nanosuitEntity2;
