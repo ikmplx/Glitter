@@ -8,10 +8,9 @@
 
 namespace MyGL
 {
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, MaterialPtr material)
+	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices)
 		: vertices(vertices)
 		, indices(indices)
-		, material(material)
 	{
 		glCreateVertexArrays(1, &_vao);
 		glCreateBuffers(1, &_vbo);
@@ -64,7 +63,6 @@ namespace MyGL
 	void Mesh::Draw(ShaderPtr shader)
 	{
 		shader->Bind();
-		material->Bind(shader);
 
 		glBindVertexArray(_vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -142,7 +140,7 @@ namespace MyGL
 			20, 23, 22
 		};
 
-		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
+		return std::make_shared<Mesh>(std::move(vertices), std::move(indices));
 	}
 
 
@@ -167,7 +165,7 @@ namespace MyGL
 			0, 2, 3
 		};
 
-		return std::make_shared<Mesh>(std::move(vertices), std::move(indices), std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Wood")));
+		return std::make_shared<Mesh>(std::move(vertices), std::move(indices));
 	}
 }
 

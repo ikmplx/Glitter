@@ -6,6 +6,7 @@
 #include "Model/Mesh.h"
 #include "Component.h"
 #include "Physics.h"
+#include "Model/Material.h"
 
 namespace MyGL
 {
@@ -13,6 +14,7 @@ namespace MyGL
 		: position(glm::vec3(0))
 		, scale(glm::vec3(1))
 		, rotation(glm::angleAxis(0.f, glm::vec3(0, 0, 1)))
+		, _material(new Material())
 	{
 	}
 
@@ -52,6 +54,7 @@ namespace MyGL
 		cloneRoot->rotation = rotation;
 		cloneRoot->scale = scale;
 		cloneRoot->_mesh = _mesh;
+		cloneRoot->_material = _material;
 
 		for (auto& child : _children) {
 			EntityPtr cloneChild = child->Clone();
@@ -86,6 +89,16 @@ namespace MyGL
 		return _mesh;
 	}
 
+	void Entity::SetMaterial(MaterialPtr material)
+	{
+		_material = material;
+	}
+
+	MaterialPtr Entity::GetMaterial()
+	{
+		return _material;
+	}
+
 	void Entity::SetRigidBody(RigidBodyPtr rigidBody)
 	{
 		_rigidBody = rigidBody;
@@ -95,8 +108,10 @@ namespace MyGL
 	{
 		if (_mesh) {
 			UpdateGlobalTransform();
+			shader->Bind();
 			shader->SetMatrix("model", GetGlobalTransform());
-			_mesh->Draw(shader);
+			_material->Bind(shader);
+			_mesh->Draw();
 		}
 	}
 

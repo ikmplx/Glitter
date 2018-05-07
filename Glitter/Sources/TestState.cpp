@@ -37,8 +37,9 @@ namespace MyGL
 		_scene->AddEntity(_floorEntity);
 
 		auto floorPlaneMesh = Primitives::CreatePlane(100.f, 100.f, 0.1f);
-		floorPlaneMesh->material->specularBase = 0.3f;
 		_floorEntity->SetMesh(floorPlaneMesh);
+		_floorEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Wood")));
+		_floorEntity->GetMaterial()->specularBase = 0.3f;
 
 		btBoxShape* floorShape = new btBoxShape(btVector3(50.f, 0.1f, 50.f));
 		RigidBodyPtr floorBody = std::make_shared<RigidBody>(_floorEntity, floorShape, 0.f);
@@ -53,6 +54,7 @@ namespace MyGL
 
 			auto boxMesh = Primitives::CreateCube();
 			boxEntity->SetMesh(boxMesh);
+			boxEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
 
 			RigidBodyPtr boxBody = std::make_shared<RigidBody>(boxEntity, boxShape, 1.f);
 			boxEntity->SetRigidBody(boxBody);
@@ -73,7 +75,7 @@ namespace MyGL
 		_towerPrefab->rotation = glm::angleAxis(glm::radians(-90.f), glm::vec3(1, 0, 0));
 		_towerPrefab->Traverse([](Entity& entity) {
 			if (entity.GetMesh()) {
-				entity.GetMesh()->material->specularBase = 0.5f;
+				entity.GetMaterial()->specularBase = 0.5f;
 			}
 		});
 

@@ -34,6 +34,9 @@ namespace MyGL
 		void SetMesh(MeshPtr mesh);
 		MeshPtr GetMesh();
 
+		void SetMaterial(MaterialPtr material);
+		MaterialPtr GetMaterial();
+
 		void SetRigidBody(RigidBodyPtr rigidBody);
 
 		void Draw(ShaderPtr shader);
@@ -56,6 +59,7 @@ namespace MyGL
 		std::vector<EntityPtr> _children;
 
 		MeshPtr _mesh;
+		MaterialPtr _material;
 
 		std::vector<ComponentPtr> _components;
 

@@ -21,9 +21,7 @@ namespace MyGL
 		std::vector<Vertex> vertices;
 		std::vector<unsigned> indices;
 
-		MaterialPtr material;
-
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, MaterialPtr material);
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices);
 		~Mesh();
 
 		void Draw(ShaderPtr shader);

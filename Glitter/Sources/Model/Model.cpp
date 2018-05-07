@@ -29,7 +29,14 @@ namespace MyGL
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[iMesh]];
 
 				EntityPtr subMeshEntity = std::make_shared<Entity>();
-				subMeshEntity->SetMesh(ProcessMesh(mesh, scene));
+
+				MeshPtr myMesh;
+				MaterialPtr myMaterial;
+
+				std::tie(myMesh, myMaterial) = ProcessMesh(mesh, scene);
+
+				subMeshEntity->SetMesh(myMesh);
+				subMeshEntity->SetMaterial(myMaterial);
 
 				nodeEntity->AddChild(subMeshEntity);
 			}
@@ -44,7 +51,7 @@ namespace MyGL
 			return nodeEntity;
 		}
 
-		MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene)
+		std::tuple<MeshPtr, MaterialPtr> ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			std::vector<Mesh::Vertex> vertices;
 			std::vector<unsigned> indices;
@@ -98,7 +105,9 @@ namespace MyGL
 				LoadMaterialTextures(material, aiTextureType::aiTextureType_NORMALS, MyGL::TextureUsage::Normal, myMaterial);
 			}
 
-			return std::make_shared<Mesh>(std::move(vertices), std::move(indices), myMaterial);
+			MeshPtr myMesh = std::make_shared<Mesh>(std::move(vertices), std::move(indices));
+
+			return std::make_tuple(myMesh, myMaterial);
 		}
 
 		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, MaterialPtr outMaterial)

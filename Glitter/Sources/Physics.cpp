@@ -97,7 +97,7 @@ namespace MyGL
 		}
 		_addRigidBodies.clear();
 
-		_world->stepSimulation(dt);
+		_world->stepSimulation(dt, 2);
 	}
 
 	void Physics::AddRigidBody(RigidBodyPtr rigidBody)
