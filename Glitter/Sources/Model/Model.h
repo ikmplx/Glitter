@@ -4,8 +4,17 @@
 
 namespace MyGL
 {
-	namespace ModelLoader
+	class ModelLoaderPrivate;
+
+	class ModelLoader
 	{
-		EntityPtr LoadModel(const std::string& path);
+	public:
+		ModelLoader(const std::string& path);
+
+		EntityPtr Load();
+		static EntityPtr LoadModel(const std::string& path);
+
+	private:
+		std::unique_ptr<ModelLoaderPrivate> d;
 	};
 }

@@ -15,12 +15,29 @@
 
 namespace MyGL
 {
-	struct ModelLoaderHelper
+	class ModelLoaderPrivate
 	{
-		std::vector<MeshPtr> meshes;
-		std::string directory;
-		EntityPtr entity;
+	public:
+		ModelLoaderPrivate(const std::string& path)
+			: inPath(path)
+		{
+		}
 
+		EntityPtr Load()
+		{
+			Assimp::Importer importer;
+			const aiScene* scene = importer.ReadFile(inPath, aiProcess_Triangulate | aiProcess_GenNormals);// | aiProcess_FlipUVs);
+
+			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+				std::cerr << "Error loading model " << inPath << ": " << importer.GetErrorString() << "\n";
+				return std::make_shared<Entity>();
+			}
+
+			directory = inPath.substr(0, inPath.find_last_of('/'));
+			return ProcessNode(scene->mRootNode, scene);
+		}
+
+	private:
 		EntityPtr ProcessNode(aiNode* node, const aiScene* scene)
 		{
 			EntityPtr nodeEntity = std::make_shared<Entity>();
@@ -50,7 +67,6 @@ namespace MyGL
 
 			return nodeEntity;
 		}
-
 		std::tuple<MeshPtr, MaterialPtr> ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			std::vector<Mesh::Vertex> vertices;
@@ -109,9 +125,7 @@ namespace MyGL
 
 			return std::make_tuple(myMesh, myMaterial);
 		}
-
-		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, MaterialPtr outMaterial)
-		{
+		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, MaterialPtr outMaterial) {
 			unsigned nTextures = material->GetTextureCount(textureType);
 			aiString path;
 
@@ -126,23 +140,30 @@ namespace MyGL
 				outMaterial->SetTexture(texture, textureUsage);
 			}
 		}
+
+	private:
+		std::string inPath;
+
+		std::vector<MeshPtr> meshes;
+		std::string directory;
+		EntityPtr entity;
 	};
 
 
+	ModelLoader::ModelLoader(const std::string & path)
+		: d(new ModelLoaderPrivate(path))
+	{
+	}
+
+	EntityPtr ModelLoader::Load()
+	{
+		return d->Load();
+	}
+
 	EntityPtr ModelLoader::LoadModel(const std::string & path)
 	{
-		ModelLoaderHelper d;
-
-		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals);// | aiProcess_FlipUVs);
-
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			std::cerr << "Error loading model " << path << ": " << importer.GetErrorString() << "\n";
-			return std::make_shared<Entity>();
-		}
-
-		d.directory = path.substr(0, path.find_last_of('/'));
-		return d.ProcessNode(scene->mRootNode, scene);
+		ModelLoader l(path);
+		return l.Load();
 	}
 }
 
