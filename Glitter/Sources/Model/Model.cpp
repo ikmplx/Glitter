@@ -7,6 +7,7 @@
 #include "Scene/Scene.h"
 #include "Scene/Entity.h"
 #include "Material.h"
+#include "Utils.h"
 
 // System Headers
 #include <assimp/Importer.hpp>
@@ -17,23 +18,24 @@ namespace MyGL
 {
 	class ModelLoaderPrivate
 	{
+		friend class ModelLoader;
+
 	public:
-		ModelLoaderPrivate(const std::string& path)
-			: inPath(path)
+		ModelLoaderPrivate()
 		{
 		}
 
-		EntityPtr Load()
+		EntityPtr Load(const std::string& path)
 		{
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(inPath, aiProcess_Triangulate | aiProcess_GenNormals);// | aiProcess_FlipUVs);
+			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals);// | aiProcess_FlipUVs);
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-				std::cerr << "Error loading model " << inPath << ": " << importer.GetErrorString() << "\n";
+				std::cerr << "Error loading model " << path << ": " << importer.GetErrorString() << "\n";
 				return std::make_shared<Entity>();
 			}
 
-			directory = inPath.substr(0, inPath.find_last_of('/'));
+			directory = path.substr(0, path.find_last_of('/'));
 			return ProcessNode(scene->mRootNode, scene);
 		}
 
@@ -105,6 +107,22 @@ namespace MyGL
 				vertices.push_back(vertex);
 			}
 
+			// Apply transform
+			if (hasTransform) {
+				glm::mat3 transformNormal = glm::mat3(glm::transpose(glm::inverse(transform)));
+				for (auto& vertex : vertices) {
+					vertex.pos = glm::vec3(transform * glm::vec4(vertex.pos, 1.f));
+
+					if (mesh->mNormals) {
+						vertex.normal = transformNormal * vertex.normal;
+					}
+
+					if (mesh->mTangents) {
+						MyAssert("Not supported");
+					}
+				}
+			}
+
 			for (unsigned i = 0; i < mesh->mNumFaces; i++) {
 				aiFace& face = mesh->mFaces[i];
 
@@ -142,28 +160,37 @@ namespace MyGL
 		}
 
 	private:
-		std::string inPath;
-
 		std::vector<MeshPtr> meshes;
 		std::string directory;
 		EntityPtr entity;
+
+		glm::mat4 transform = glm::mat4(1.f);
+		bool hasTransform = false;
 	};
 
 
-	ModelLoader::ModelLoader(const std::string & path)
-		: d(new ModelLoaderPrivate(path))
+	ModelLoader::ModelLoader()
+		: d(new ModelLoaderPrivate())
 	{
 	}
 
-	EntityPtr ModelLoader::Load()
+	ModelLoader::~ModelLoader() = default;
+
+	EntityPtr ModelLoader::Load(const std::string& path)
 	{
-		return d->Load();
+		return d->Load(path);
 	}
 
 	EntityPtr ModelLoader::LoadModel(const std::string & path)
 	{
-		ModelLoader l(path);
-		return l.Load();
+		ModelLoader l;
+		return l.Load(path);
+	}
+
+	void ModelLoader::SetTransform(const glm::mat4 & transform)
+	{
+		d->transform = transform;
+		d->hasTransform = true;
 	}
 }
 

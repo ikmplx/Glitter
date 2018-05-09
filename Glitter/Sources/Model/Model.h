@@ -9,10 +9,13 @@ namespace MyGL
 	class ModelLoader
 	{
 	public:
-		ModelLoader(const std::string& path);
+		ModelLoader();
+		~ModelLoader();
 
-		EntityPtr Load();
+		EntityPtr Load(const std::string& path);
 		static EntityPtr LoadModel(const std::string& path);
+
+		void SetTransform(const glm::mat4& transform);
 
 	private:
 		std::unique_ptr<ModelLoaderPrivate> d;

@@ -71,13 +71,17 @@ namespace MyGL
 
 		_nanosuitPrefab = ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
 
-		_towerPrefab = ModelLoader::LoadModel("Models/vox/chr_sword.ply");
-		_towerPrefab->rotation = glm::angleAxis(glm::radians(-90.f), glm::vec3(1, 0, 0));
-		_towerPrefab->Traverse([](Entity& entity) {
-			if (entity.GetMesh()) {
-				entity.GetMaterial()->specularBase = 0.5f;
-			}
-		});
+		{
+			ModelLoader loader;
+			loader.SetTransform(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1, 0, 0)));
+			_towerPrefab = loader.Load("Models/vox/chr_sword.ply");
+
+			_towerPrefab->Traverse([](Entity& entity) {
+				if (entity.GetMesh()) {
+					entity.GetMaterial()->specularBase = 0.5f;
+				}
+			});
+		}
 
 		_scene = std::make_shared<MyGL::Scene>();
 
