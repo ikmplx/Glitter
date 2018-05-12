@@ -122,6 +122,22 @@ namespace MyGL
 	void TestState::Update(float dt)
 	{
 		Physics::Instance()->Update(dt);
+
+		const float secondsPerTick = 1.f / 60.f;
+
+		_gameTimeAcc += dt;
+		while (_gameTimeAcc > secondsPerTick) {
+			_gameTimeAcc -= secondsPerTick;
+			UpdateGame(secondsPerTick);
+		}
+	}
+
+	void TestState::UpdateGame(float dt)
+	{
+		_lightRotation += dt * 0.01f;
+		glm::vec3 lightDir = glm::vec3(0.2f, -0.8f, -1.f);
+		glm::quat lightRotation = glm::angleAxis(_lightRotation, glm::vec3(0.f, 1.f, 0.f));
+		_lightDir = lightRotation * lightDir;
 	}
 
 	void TestState::Draw()
@@ -187,10 +203,11 @@ namespace MyGL
 		ShaderPtr dirShader = ResourceManager::Instance()->GetShader("Pass2Directional");
 		dirShader->Bind();
 
-		static glm::vec3 lightDir(0.2f, -1.f, -1.f);
-		static bool enableBlinn = true;
+		glm::vec3 lightDir = _lightDir;
+		// glm::quat lightRotation = glm::angleAxis(_lightRotation, glm::vec3(0.f, 1.f, 0.f));
+		// lightDir = lightRotation * lightDir;
 
-		ImGui::SliderFloat3("Light dir", &lightDir.r, -1.f, 1.f);
+		static bool enableBlinn = true;
 		ImGui::Checkbox("Blinn", &enableBlinn);
 
 		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.7f, 0.7f, 0.7f)));
@@ -247,9 +264,14 @@ namespace MyGL
 		glActiveTexture(GL_TEXTURE0);
 		skyboxTexture->Bind();
 
+		glm::mat4 skyTransform(1.f);
+		//skyTransform = glm::scale(skyTransform, glm::vec3(1.f, 1.f, -1.f));
+
 		shader->Bind();
 		shader->SetInt("sampler", 0);
 		shader->SetFloat("gamma", _gamma);
+		shader->SetMatrix("skyTransform", skyTransform);
+		shader->SetVec3("sunDir", glm::normalize(-_lightDir));
 
 		glBindVertexArray(_emptyVao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

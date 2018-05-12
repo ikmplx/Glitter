@@ -19,6 +19,8 @@ namespace MyGL
 		virtual void Draw() override;
 
 	private:
+		void UpdateGame(float dt);
+
 		void CreateFramebuffer();
 		void CreatePhysicObjects();
 
@@ -45,5 +47,10 @@ namespace MyGL
 
 		FramebufferPtr _framebufferPass2;
 		AttachmentPtr _colorPass2;
+
+		float _gameTimeAcc = 0.f;
+
+		float _lightRotation = 0.f;
+		glm::vec3 _lightDir = glm::vec3(0.2f, -1.f, -1.f);
 	};
 }

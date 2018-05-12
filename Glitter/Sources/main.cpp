@@ -166,7 +166,7 @@ int main()
 		double lastFps;
 	} fpsCounter = { 0, lastTime, 0 };
 
-	double frameTimeLimit = 1.0 / 70.0;
+	double frameTimeLimit = 1.0 / 110.0;
 
 	double nextFrameTime = lastTime + frameTimeLimit;
 	double frameLimiterActive = 0.0;
