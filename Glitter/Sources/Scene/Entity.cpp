@@ -126,7 +126,6 @@ namespace MyGL
 	void Entity::AddComponent(ComponentPtr component)
 	{
 		_components.push_back(component);
-		component->entity = weak_from_this();
 	}
 
 	ComponentPtr Entity::FindComponent(const std::type_info & typeInfo)

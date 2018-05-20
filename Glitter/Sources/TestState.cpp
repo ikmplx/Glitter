@@ -33,8 +33,7 @@ namespace MyGL
 	void TestState::CreatePhysicObjects()
 	{
 		// Plane
-		_floorEntity = _scene->CreateEntity();
-		_scene->AddEntity(_floorEntity);
+		_floorEntity = _scene->CreateEntity(_floorEntity);
 
 		auto floorPlaneMesh = Primitives::CreatePlane(100.f, 100.f, 0.1f);
 		_floorEntity->SetMesh(floorPlaneMesh);
@@ -50,7 +49,6 @@ namespace MyGL
 		btBoxShape* boxShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
 		for (int i = 0; i < 100; i++) {
 			auto boxEntity = _scene->CreateEntity();
-			_scene->AddEntity(boxEntity);
 
 			auto boxMesh = Primitives::CreateCube();
 			boxEntity->SetMesh(boxMesh);
@@ -96,14 +94,12 @@ namespace MyGL
 		_nanosuitEntity1->rotation = glm::angleAxis(glm::radians(35.f), glm::vec3(0, 1, 0));
 		_nanosuitEntity2->rotation = glm::angleAxis(glm::radians(-35.f), glm::vec3(0, 1, 0));
 
-		// _nanosuitEntity2->scale = glm::vec3(1.f, 5.f, 1.f);
-
 		_towerEntity = _towerPrefab->Clone();
 		_towerEntity->position += glm::vec3(0, 0, -10);
 
-		_centerEntity->AddChild(_nanosuitEntity1);
-		_centerEntity->AddChild(_nanosuitEntity2);
-		_centerEntity->AddChild(_towerEntity);
+		_scene->AddEntity(_nanosuitEntity1, _centerEntity);
+		_scene->AddEntity(_nanosuitEntity2, _centerEntity);
+		_scene->AddEntity(_towerEntity, _centerEntity);
 
 		_deferredRenderer = std::make_shared<DeferredRenderer>(_vpWidth, _vpHeight);
 		_framebufferPass2 = std::make_shared<Framebuffer>();
@@ -138,6 +134,8 @@ namespace MyGL
 		glm::vec3 lightDir = glm::vec3(0.2f, -0.8f, -1.f);
 		glm::quat lightRotation = glm::angleAxis(_lightRotation, glm::vec3(0.f, 1.f, 0.f));
 		_lightDir = lightRotation * lightDir;
+
+		_scene->Update(dt);
 	}
 
 	void TestState::Draw()

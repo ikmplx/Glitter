@@ -12,13 +12,17 @@ namespace MyGL
 		Scene();
 		~Scene();
 
-		EntityPtr CreateEntity();
+		EntityPtr CreateEntity(EntityPtr parentEntity = nullptr);
+		void AddEntity(EntityPtr entity, EntityPtr parentEntity = nullptr);
 
-		void AddEntity(EntityPtr ptr);
+		void Update(float dt);
 		void Draw(ShaderPtr shader);
 
 	private:
-		EntityPtr _rootEntity;
-	};
+		void CompleteAddingEntities();
 
+	private:
+		EntityPtr _rootEntity;
+		std::vector<EntityPtr> _addingEntities;
+	};
 }

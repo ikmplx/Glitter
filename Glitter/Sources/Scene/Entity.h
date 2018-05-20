@@ -22,9 +22,9 @@ namespace MyGL
 
 		EntityPtr Clone();
 
-		EntityPtr CreateChild();
-		void AddChild(EntityPtr child);
-
+		EntityPtr CreateChild();// Can't be called on entities, attached to scene
+		void AddChild(EntityPtr child);// Can't be called on entities, attached to scene
+	
 		template <typename T>
 		void AddComponent();
 

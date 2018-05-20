@@ -12,8 +12,6 @@ namespace MyGL
 	{
 		Component();
 		virtual ~Component();
-
-		EntityWeakPtr entity;
 	};
 
 #if false
