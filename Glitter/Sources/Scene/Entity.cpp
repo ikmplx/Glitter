@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "Entity.h"
+#include "Utils.h"
 #include "Res/Shader.h"
 #include "Model/Mesh.h"
 #include "Component.h"

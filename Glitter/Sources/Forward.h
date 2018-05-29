@@ -4,6 +4,7 @@
 
 namespace MyGL
 {
+	// Graphics
 	class Attachment;
 	using AttachmentPtr = std::shared_ptr<Attachment>;
 
@@ -28,6 +29,15 @@ namespace MyGL
 	class Mesh;
 	using MeshPtr = std::shared_ptr<Mesh>;
 
+	class Material;
+	using MaterialPtr = std::shared_ptr<Material>;
+
+	class Camera;
+
+	enum class TextureUsage;
+
+	// ECS
+
 	class Scene;
 	using ScenePtr = std::shared_ptr<Scene>;
 
@@ -38,15 +48,15 @@ namespace MyGL
 	struct Component;
 	using ComponentPtr = std::shared_ptr<Component>;
 	using ComponentWeakPtr = std::weak_ptr<Component>;
-
-	class Material;
-	using MaterialPtr = std::shared_ptr<Material>;
+	using ComponentType = std::type_index;
 
 	class RigidBody;
 	using RigidBodyPtr = std::shared_ptr<RigidBody>;
 	using RigidBodyWeakPtr = std::weak_ptr<RigidBody>;
 
-	class Camera;
+	class Group;
+	using GroupPtr = std::shared_ptr<Group>;
 
-	enum class TextureUsage;
+	class System;
+	using SystemPtr = std::shared_ptr<System>;
 }

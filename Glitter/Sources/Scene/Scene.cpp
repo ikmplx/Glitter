@@ -2,8 +2,11 @@
 
 #include "stdafx.h"
 
+#include "Utils.h"
 #include "Scene.h"
 #include "Entity.h"
+#include "Component.h"
+#include "System.h"
 #include "Model/Mesh.h"
 #include "Res/Shader.h"
 
@@ -46,6 +49,11 @@ namespace MyGL
 		});
 	}
 
+	void Scene::AddSystem(SystemPtr system)
+	{
+		_systems.push_back(system);
+	}
+
 	void Scene::CompleteAddingEntities()
 	{
 		for (auto& addingEntity : _addingEntities) {
@@ -53,9 +61,34 @@ namespace MyGL
 			if (parent) {
 				parent->_children.push_back(addingEntity);
 			}
+
+			addingEntity->Traverse([this](Entity& ent) {
+				EntityAdded(ent.shared_from_this());
+			});
 		}
 
 		_addingEntities.clear();
+	}
+
+	void Scene::EntityAdded(EntityPtr entity)
+	{
+		for (auto& system : _systems) {
+			system->EntityAdded(entity);
+		}
+	}
+
+	void Scene::EnsureComponentTypeId(ComponentPtr component)
+	{
+		if (component->componentTypeId < 0) {
+			ComponentType ct(typeid(*component));
+
+			auto emplaceResult = _componentTypeIds.emplace(ct, _componentTypeIdCounter);
+			if (emplaceResult.second) {
+				_componentTypeIdCounter++;
+			}
+
+			component->componentTypeId = emplaceResult.first->second;
+		}
 	}
 }
 

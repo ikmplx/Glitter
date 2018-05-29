@@ -25,12 +25,6 @@ namespace MyGL
 		EntityPtr CreateChild();// Can't be called on entities, attached to scene
 		void AddChild(EntityPtr child);// Can't be called on entities, attached to scene
 	
-		template <typename T>
-		void AddComponent();
-
-		template <typename T>
-		std::shared_ptr<T> FindComponent();
-
 		void SetMesh(MeshPtr mesh);
 		MeshPtr GetMesh();
 
@@ -62,6 +56,7 @@ namespace MyGL
 		MaterialPtr _material;
 
 		std::vector<ComponentPtr> _components;
+		// mutable std::set<ComponentType> _componentTypesSet;
 
 		glm::mat4 _globalTransform;
 		bool _isGlobalTransformNeedUpdate = true;
@@ -76,18 +71,5 @@ namespace MyGL
 		for (auto& child : _children) {
 			child->Traverse(fun);
 		}
-	}
-
-	template<typename T>
-	inline void Entity::AddComponent()
-	{
-		ComponentPtr component = std::static_pointer_cast<Component>(std::make_shared<T>());
-		AddComponent(component);
-	}
-
-	template<typename T>
-	inline std::shared_ptr<T> Entity::FindComponent()
-	{
-		return std::static_pointer_cast<T>(FindComponent(typeid(T)));
 	}
 }
