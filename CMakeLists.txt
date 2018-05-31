@@ -5,25 +5,7 @@ project(Glitter)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# GLFW
-option(GLFW_BUILD_DOCS OFF)
-option(GLFW_BUILD_EXAMPLES OFF)
-option(GLFW_BUILD_TESTS OFF)
-add_subdirectory(Glitter/Vendor/glfw)
-
-# Assimp
-option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-option(ASSIMP_BUILD_SAMPLES OFF)
-option(ASSIMP_BUILD_TESTS OFF)
-add_subdirectory(Glitter/Vendor/assimp)
-
-# Bullet
-option(BUILD_BULLET2_DEMOS OFF)
-option(BUILD_CPU_DEMOS OFF)
-option(BUILD_EXTRAS OFF)
-option(BUILD_OPENGL3_DEMOS OFF)
-option(BUILD_UNIT_TESTS OFF)
-add_subdirectory(Glitter/Vendor/bullet)
+include(ExternalProject)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
@@ -38,13 +20,12 @@ else()
 endif()
 
 include_directories(Glitter/Sources/
-                    Glitter/Vendor/assimp/include/
+#                    Glitter/Vendor/assimp/include/
                     Glitter/Vendor/glad/include/
-                    Glitter/Vendor/glfw/include/
                     Glitter/Vendor/glm/
                     Glitter/Vendor/stb/
                     
-                    Glitter/Vendor/bullet/src/
+#                    Glitter/Vendor/bullet/src/
 
 					Glitter/Vendor/imgui/
 					Glitter/Vendor/imgui_impl/
@@ -52,8 +33,7 @@ include_directories(Glitter/Sources/
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c 
                           Glitter/Vendor/imgui/imgui*.cpp
-                          Glitter/Vendor/imgui_impl/*.cpp
-						  )
+                          Glitter/Vendor/imgui_impl/*.cpp)
 
 file(GLOB_RECURSE PROJECT_SOURCES Glitter/Sources/*.cpp )
 file(GLOB_RECURSE PROJECT_HEADERS Glitter/Sources/*.h)
@@ -106,16 +86,16 @@ source_group("Textures" FILES ${PROJECT_TEXTURES})
 #source_group("Sources" FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 source_group("Vendors" FILES ${VENDORS_SOURCES})
 
-add_definitions(-DGLFW_INCLUDE_NONE
-                -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
+add_definitions(-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS} 
+add_executable(Glitter ${PROJECT_SOURCES} ${PROJECT_HEADERS} 
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS} ${PROJECT_TEXTURES}
                                ${VENDORS_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} assimp glfw
-                      ${GLFW_LIBRARIES} ${GLAD_LIBRARIES}
-                      BulletDynamics BulletCollision LinearMath
-                      )
+include(CMake/glfw.cmake)
+include(CMake/bullet.cmake)
+include(CMake/assimp.cmake)
+
+target_link_libraries(Glitter ${GLAD_LIBRARIES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Glitter")
