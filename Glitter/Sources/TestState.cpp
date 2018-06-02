@@ -15,16 +15,34 @@
 #include "DeferredRenderer.h"
 #include "Model/Material.h"
 #include "Physics.h"
+#include "Scene/System.h"
+#include "Scene/Component.h"
 
 #include "Utils.h"
 
 namespace MyGL
 {
+	class TestComponent : public Component
+	{
+	};
+
+	class TestSystem : public System
+	{
+	public:
+		TestSystem()
+			: System(typeid(TestComponent))
+		{
+		}
+
+		virtual void Update(float dt) override
+		{
+
+		}
+	};
+
 	TestState::TestState()
 	{
 	}
-
-
 
 	TestState::~TestState()
 	{
@@ -49,6 +67,7 @@ namespace MyGL
 		btBoxShape* boxShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
 		for (int i = 0; i < 100; i++) {
 			auto boxEntity = _scene->CreateEntity();
+			_scene->AddComponent(boxEntity, ComponentPtr(new TestComponent()));
 
 			auto boxMesh = Primitives::CreateCube();
 			boxEntity->SetMesh(boxMesh);
@@ -67,7 +86,7 @@ namespace MyGL
 	{
 		GetCamera().SetPosition(glm::vec3(0.f, 7.f, 37.f));
 
-		_nanosuitPrefab = ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
+		//_nanosuitPrefab = ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
 
 		{
 			ModelLoader loader;
@@ -82,9 +101,11 @@ namespace MyGL
 		}
 
 		_scene = std::make_shared<MyGL::Scene>();
+		_scene->AddSystem(std::make_shared<TestSystem>());
 
 		_centerEntity = _scene->CreateEntity();
 
+		/*
 		_nanosuitEntity1 = _nanosuitPrefab->Clone();
 		_nanosuitEntity2 = _nanosuitPrefab->Clone();
 
@@ -93,12 +114,12 @@ namespace MyGL
 
 		_nanosuitEntity1->rotation = glm::angleAxis(glm::radians(35.f), glm::vec3(0, 1, 0));
 		_nanosuitEntity2->rotation = glm::angleAxis(glm::radians(-35.f), glm::vec3(0, 1, 0));
-
+		*/
 		_towerEntity = _towerPrefab->Clone();
 		_towerEntity->position += glm::vec3(0, 0, -10);
 
-		_scene->AddEntity(_nanosuitEntity1, _centerEntity);
-		_scene->AddEntity(_nanosuitEntity2, _centerEntity);
+		//_scene->AddEntity(_nanosuitEntity1, _centerEntity);
+		//_scene->AddEntity(_nanosuitEntity2, _centerEntity);
 		_scene->AddEntity(_towerEntity, _centerEntity);
 
 		_deferredRenderer = std::make_shared<DeferredRenderer>(_vpWidth, _vpHeight);

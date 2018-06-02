@@ -4,34 +4,43 @@
 
 #include "System.h"
 #include "Component.h"
+#include "Scene.h"
+#include "Entity.h"
 
 namespace MyGL
 {
 	System::System(ComponentType componentTypes)
 	{
 		_componentTypes.push_back(componentTypes);
-
-		UpdateComponentTypesSet();
 	}
 
 	System::~System()
 	{
 	}
 
-	void System::Update(float dt)
+
+	void System::AddedToScene(ScenePtr scene, int systemTypeId)
 	{
+		for (auto& componentType : _componentTypes) {
+			_componentTypeSet.set(scene->EnsureComponentTypeId(componentType));
+		}
+
+		_systemTypeId = systemTypeId;
 	}
 
-	void System::EntityAdded(EntityPtr entity)
+	void System::EntityComponentsUpdated(EntityPtr entity)
 	{
+		if ((entity->_componentTypeSet & _componentTypeSet) == _componentTypeSet) {
+			if (!entity->_systemTypeSet.test(_systemTypeId)) {
+				entity->_systemTypeSet.set(_systemTypeId);
+				_entities.push_back(entity);
+			}
+		}
+		else {
+			if (entity->_systemTypeSet.test(_systemTypeId)) {
+				entity->_systemTypeSet.reset(_systemTypeId);
+				_entities.erase(std::find(_entities.begin(), _entities.end(), entity));
+			}
+		}
 	}
-
-	void System::ComponentAdded(EntityPtr entity, ComponentPtr component)
-	{
-	}
-
-	void System::UpdateComponentTypesSet()
-	{
-	}
-
 }

@@ -124,11 +124,6 @@ namespace MyGL
 		}
 	}
 
-	void Entity::AddComponent(ComponentPtr component)
-	{
-		_components.push_back(component);
-	}
-
 	ComponentPtr Entity::FindComponent(const std::type_info & typeInfo)
 	{
 		for (const auto& component : _components) {

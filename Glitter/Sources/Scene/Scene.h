@@ -6,7 +6,7 @@
 
 namespace MyGL
 {
-	class Scene
+	class Scene : public std::enable_shared_from_this<Scene>
 	{
 	public:
 		Scene();
@@ -23,17 +23,24 @@ namespace MyGL
 
 		void AddSystem(SystemPtr system);
 
+		int EnsureComponentTypeId(ComponentType componentType);
 
 	private:
 		void CompleteAddingEntities();
+		void CompleteAddingComponents();
+		void CompleteChangingComponentsEntities();
 
 		void EntityAdded(EntityPtr entity);
+		void ComponentAdded(EntityPtr entity, ComponentPtr component);
 
-		void EnsureComponentTypeId(ComponentPtr component);
+		int EnsureComponentTypeId(ComponentPtr component);
 
 	private:
 		EntityPtr _rootEntity;
+		
 		std::vector<EntityPtr> _addingEntities;
+		std::vector<std::tuple<EntityPtr, ComponentPtr>> _addingComponents;
+		std::set<EntityPtr> _changingComponentsEntities;
 
 		std::vector<SystemPtr> _systems;
 

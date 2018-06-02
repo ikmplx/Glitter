@@ -10,6 +10,7 @@ namespace MyGL
 	{
 		friend class RigidBody;
 		friend class Scene;
+		friend class System;
 
 	public:
 		Entity();
@@ -38,7 +39,6 @@ namespace MyGL
 		void InvalidateTransform();
 
 	private:
-		void AddComponent(ComponentPtr component);
 		ComponentPtr FindComponent(const std::type_info& typeInfo);
 
 		void UpdateGlobalTransform();
@@ -56,7 +56,9 @@ namespace MyGL
 		MaterialPtr _material;
 
 		std::vector<ComponentPtr> _components;
-		// mutable std::set<ComponentType> _componentTypesSet;
+
+		ComponentTypeSet _componentTypeSet;
+		SystemTypeSet _systemTypeSet;
 
 		glm::mat4 _globalTransform;
 		bool _isGlobalTransformNeedUpdate = true;

@@ -36,10 +36,26 @@ namespace MyGL
 		_addingEntities.push_back(entity);
 	}
 
+	void Scene::AddComponent(EntityPtr entity, ComponentPtr component)
+	{
+		_addingComponents.emplace_back(entity, component);
+	}
+
 	void Scene::Update(float dt)
 	{
+		CompleteAddingEntities();
+		CompleteAddingComponents();
+		CompleteChangingComponentsEntities();
+
+
+		for (auto& system : _systems) {
+			system->Update(dt);
+		}
+
 
 		CompleteAddingEntities();
+		CompleteAddingComponents();
+		CompleteChangingComponentsEntities();
 	}
 
 	void Scene::Draw(ShaderPtr shader)
@@ -51,6 +67,7 @@ namespace MyGL
 
 	void Scene::AddSystem(SystemPtr system)
 	{
+		system->AddedToScene(shared_from_this(), (int) _systems.size());
 		_systems.push_back(system);
 	}
 
@@ -70,25 +87,57 @@ namespace MyGL
 		_addingEntities.clear();
 	}
 
+	void Scene::CompleteAddingComponents()
+	{
+		for (auto& addingComponentTuple : _addingComponents) {
+			EntityPtr entity = std::get<0>(addingComponentTuple);
+			ComponentPtr component = std::get<1>(addingComponentTuple);
+			ComponentAdded(entity, component);
+		}
+
+		_addingComponents.clear();
+	}
+
+	void Scene::CompleteChangingComponentsEntities()
+	{
+		for (auto& c : _changingComponentsEntities) {
+			for (auto& system : _systems) {
+				system->EntityComponentsUpdated(c);
+			}
+		}
+
+		_changingComponentsEntities.clear();
+	}
+
 	void Scene::EntityAdded(EntityPtr entity)
 	{
-		for (auto& system : _systems) {
-			system->EntityAdded(entity);
+		for (auto& component : entity->_components) {
+			_addingComponents.emplace_back(entity, component);
 		}
 	}
 
-	void Scene::EnsureComponentTypeId(ComponentPtr component)
+	void Scene::ComponentAdded(EntityPtr entity, ComponentPtr component)
+	{
+		entity->_componentTypeSet.set(EnsureComponentTypeId(component));
+		_changingComponentsEntities.insert(entity);
+	}
+
+	int Scene::EnsureComponentTypeId(ComponentPtr component)
 	{
 		if (component->componentTypeId < 0) {
-			ComponentType ct(typeid(*component));
-
-			auto emplaceResult = _componentTypeIds.emplace(ct, _componentTypeIdCounter);
-			if (emplaceResult.second) {
-				_componentTypeIdCounter++;
-			}
-
-			component->componentTypeId = emplaceResult.first->second;
+			component->componentTypeId = EnsureComponentTypeId(typeid(*component));
 		}
+
+		return component->componentTypeId;
+	}
+
+	int Scene::EnsureComponentTypeId(ComponentType componentType)
+	{
+		auto emplaceResult = _componentTypeIds.emplace(componentType, _componentTypeIdCounter);
+		if (emplaceResult.second) {
+			_componentTypeIdCounter++;
+		}
+
+		return emplaceResult.first->second;
 	}
 }
-

@@ -11,21 +11,21 @@ namespace MyGL
 		System(ComponentType componentTypes);
 		virtual ~System();
 
-		virtual void Update(float dt);
+		virtual void Update(float dt) = 0;
 
-		void EntityAdded(EntityPtr entity);
-		void EntityRemoved(EntityPtr entity);
+		void AddedToScene(ScenePtr scene, int systemTypeId);
 
-		void ComponentAdded(EntityPtr entity, ComponentPtr component);
-		void ComponentRemoved(EntityPtr entity, ComponentPtr component);
+		void EntityComponentsUpdated(EntityPtr entity);
 
 	private:
-		void UpdateComponentTypesSet();
 
 	private:
 		std::vector<EntityPtr> _entities;
 		std::vector<ComponentType> _componentTypes;
 
+		ComponentTypeSet _componentTypeSet;
+
+		int _systemTypeId;
 	};
 	using SystemPtr = std::shared_ptr<System>;
 }

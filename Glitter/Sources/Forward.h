@@ -49,6 +49,7 @@ namespace MyGL
 	using ComponentPtr = std::shared_ptr<Component>;
 	using ComponentWeakPtr = std::weak_ptr<Component>;
 	using ComponentType = std::type_index;
+	using ComponentTypeSet = std::bitset<32>;
 
 	class RigidBody;
 	using RigidBodyPtr = std::shared_ptr<RigidBody>;
@@ -59,4 +60,5 @@ namespace MyGL
 
 	class System;
 	using SystemPtr = std::shared_ptr<System>;
+	using SystemTypeSet = std::bitset<32>;
 }

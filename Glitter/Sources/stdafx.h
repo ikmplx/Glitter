@@ -29,4 +29,4 @@
 #include <memory>
 #include <typeindex>
 #include <memory>
-
+#include <bitset>
