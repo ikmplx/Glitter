@@ -34,9 +34,13 @@ namespace MyGL
 		{
 		}
 
-		virtual void Update(float dt) override
+		virtual void Update(ScenePtr scene, float dt) override
 		{
-
+			for (auto& entity : GetEntities()) {
+				if (entity->GetGlobalPosition().y < -10) {
+					scene->RemoveEntity(entity);
+				}
+			}
 		}
 	};
 

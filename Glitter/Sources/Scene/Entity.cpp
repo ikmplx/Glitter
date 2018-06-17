@@ -47,6 +47,11 @@ namespace MyGL
 		return _globalTransform;
 	}
 
+	const glm::vec3& Entity::GetGlobalPosition() const
+	{
+		return glm::vec3(_globalTransform[3]);
+	}
+
 	EntityPtr Entity::Clone()
 	{
 		EntityPtr cloneRoot = std::make_shared<Entity>();

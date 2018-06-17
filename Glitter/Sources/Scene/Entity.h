@@ -20,6 +20,7 @@ namespace MyGL
 		void Traverse(Fun fun);
 
 		const glm::mat4& GetGlobalTransform() const;
+		const glm::vec3& GetGlobalPosition() const;
 
 		EntityPtr Clone();
 

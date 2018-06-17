@@ -36,26 +36,32 @@ namespace MyGL
 		_addingEntities.push_back(entity);
 	}
 
+	void Scene::RemoveEntity(EntityPtr entity)
+	{
+		_removingEntities.push_back(entity);
+	}
+
 	void Scene::AddComponent(EntityPtr entity, ComponentPtr component)
 	{
 		_addingComponents.emplace_back(entity, component);
 	}
 
+	void Scene::RemoveComponent(EntityPtr entity, ComponentPtr component)
+	{
+		_removingComponents.emplace_back(entity, component);
+	}
+
 	void Scene::Update(float dt)
 	{
-		CompleteAddingEntities();
-		CompleteAddingComponents();
-		CompleteChangingComponentsEntities();
+		ScenePtr sharedThis = shared_from_this();
 
+		Complete();
 
 		for (auto& system : _systems) {
-			system->Update(dt);
+			system->Update(sharedThis, dt);
 		}
 
-
-		CompleteAddingEntities();
-		CompleteAddingComponents();
-		CompleteChangingComponentsEntities();
+		Complete();
 	}
 
 	void Scene::Draw(ShaderPtr shader)
@@ -69,6 +75,17 @@ namespace MyGL
 	{
 		system->AddedToScene(shared_from_this(), (int) _systems.size());
 		_systems.push_back(system);
+	}
+
+	void Scene::Complete()
+	{
+		CompleteAddingEntities();
+		CompleteAddingComponents();
+
+		CompleteRemovingEntities();
+		CompleteRemovingComponents();
+
+		CompleteChangingComponentsEntities();
 	}
 
 	void Scene::CompleteAddingEntities()
@@ -98,6 +115,38 @@ namespace MyGL
 		_addingComponents.clear();
 	}
 
+	void Scene::CompleteRemovingEntities()
+	{
+		for (auto& removingEntity : _removingEntities) {
+			EntityPtr parent = (removingEntity->_parent).lock();
+			if (parent) {
+				auto& children = parent->_children;
+
+				// TODO: OPTIMIZATION: can erase all children at once
+				children.erase(std::remove(children.begin(), children.end(), removingEntity), children.end());
+				removingEntity->_parent.reset();
+
+				removingEntity->Traverse([this](Entity& ent) {
+					EntityRemoved(ent.shared_from_this());
+				});
+			}
+		}
+
+		_removingEntities.clear();
+	}
+
+	void Scene::CompleteRemovingComponents()
+	{
+		for (auto& removingComponentTuple : _removingComponents) {
+			EntityPtr entity = std::get<0>(removingComponentTuple);
+			ComponentPtr component = std::get<1>(removingComponentTuple);
+			ComponentRemoved(entity, component);
+		}
+
+		_addingComponents.clear();
+
+	}
+
 	void Scene::CompleteChangingComponentsEntities()
 	{
 		for (auto& c : _changingComponentsEntities) {
@@ -118,8 +167,31 @@ namespace MyGL
 
 	void Scene::ComponentAdded(EntityPtr entity, ComponentPtr component)
 	{
-		entity->_componentTypeSet.set(EnsureComponentTypeId(component));
-		_changingComponentsEntities.insert(entity);
+		int componentTypeId = EnsureComponentTypeId(component);
+		if (!entity->_componentTypeSet.test(componentTypeId)) {
+			entity->_componentTypeSet.set(componentTypeId);
+			entity->_components.push_back(component);
+
+			_changingComponentsEntities.insert(entity);
+		}
+	}
+
+	void Scene::EntityRemoved(EntityPtr entity)
+	{
+		for (auto& component : entity->_components) {
+			_removingComponents.emplace_back(entity, component);
+		}
+	}
+
+	void Scene::ComponentRemoved(EntityPtr entity, ComponentPtr component)
+	{
+		int componentTypeId = EnsureComponentTypeId(component);
+		if (entity->_componentTypeSet.test(componentTypeId)) {
+			entity->_componentTypeSet.reset(EnsureComponentTypeId(component));
+			entity->_components.erase(std::find(entity->_components.begin(), entity->_components.end(), component), entity->_components.end());
+
+			_changingComponentsEntities.insert(entity);
+		}
 	}
 
 	int Scene::EnsureComponentTypeId(ComponentPtr component)

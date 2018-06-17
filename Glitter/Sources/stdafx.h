@@ -30,3 +30,4 @@
 #include <typeindex>
 #include <memory>
 #include <bitset>
+#include <algorithm>
