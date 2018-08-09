@@ -24,3 +24,6 @@
 [submodule "Glitter/Vendor/bullet"]
 	path = Glitter/Vendor/bullet
 	url = https://github.com/bulletphysics/bullet3.git
+[submodule "Glitter/Vendor/googletest"]
+	path = Glitter/Vendor/googletest
+	url = https://github.com/google/googletest.git

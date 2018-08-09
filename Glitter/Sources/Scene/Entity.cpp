@@ -21,35 +21,29 @@ namespace MyGL
 
 	Entity::~Entity() = default;
 
-	void Entity::UpdateGlobalTransform()
-	{
-		if (!_isGlobalTransformNeedUpdate || (_rigidBody != nullptr && _rigidBody->IsPhysicsTransform())) {
-			return;
-		}
-
-		_globalTransform = glm::mat4(1.f);
-
-		EntityPtr parentEntity = _parent.lock();
-		if (parentEntity) {
-			parentEntity->UpdateGlobalTransform();
-			_globalTransform = parentEntity->_globalTransform;
-		}
-
-		_globalTransform = glm::translate(_globalTransform, position);
-		_globalTransform *= glm::mat4_cast(rotation);
-		_globalTransform = glm::scale(_globalTransform, scale);
-
-		_isGlobalTransformNeedUpdate = false;
-	}
-
 	const glm::mat4& Entity::GetGlobalTransform() const
 	{
+		if (_isGlobalTransformNeedUpdate && (_rigidBody == nullptr || !_rigidBody->IsPhysicsTransform())) {
+			_globalTransform = glm::mat4(1.f);
+
+			EntityPtr parentEntity = _parent.lock();
+			if (parentEntity) {
+				_globalTransform = parentEntity->GetGlobalTransform();
+			}
+
+			_globalTransform = glm::translate(_globalTransform, position);
+			_globalTransform *= glm::mat4_cast(rotation);
+			_globalTransform = glm::scale(_globalTransform, scale);
+
+			_isGlobalTransformNeedUpdate = false;
+		}
+
 		return _globalTransform;
 	}
 
-	const glm::vec3& Entity::GetGlobalPosition() const
+	glm::vec3 Entity::GetGlobalPosition() const
 	{
-		return glm::vec3(_globalTransform[3]);
+		return glm::vec3(GetGlobalTransform()[3]);
 	}
 
 	EntityPtr Entity::Clone()
@@ -113,7 +107,6 @@ namespace MyGL
 	void Entity::Draw(ShaderPtr shader)
 	{
 		if (_mesh) {
-			UpdateGlobalTransform();
 			shader->Bind();
 			shader->SetMatrix("model", GetGlobalTransform());
 			_material->Bind(shader);

@@ -95,6 +95,7 @@ add_executable(Glitter ${PROJECT_SOURCES} ${PROJECT_HEADERS}
 include(CMake/glfw.cmake)
 include(CMake/bullet.cmake)
 include(CMake/assimp.cmake)
+include(CMake/test.cmake)
 
 target_link_libraries(Glitter ${GLAD_LIBRARIES})
 

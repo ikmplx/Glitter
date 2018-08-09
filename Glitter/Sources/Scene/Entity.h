@@ -20,7 +20,7 @@ namespace MyGL
 		void Traverse(Fun fun);
 
 		const glm::mat4& GetGlobalTransform() const;
-		const glm::vec3& GetGlobalPosition() const;
+		glm::vec3 GetGlobalPosition() const;
 
 		EntityPtr Clone();
 
@@ -42,8 +42,6 @@ namespace MyGL
 	private:
 		ComponentPtr FindComponent(const std::type_info& typeInfo);
 
-		void UpdateGlobalTransform();
-
 	public:
 		glm::quat rotation;
 		glm::vec3 position;
@@ -61,8 +59,8 @@ namespace MyGL
 		ComponentTypeSet _componentTypeSet;
 		SystemTypeSet _systemTypeSet;
 
-		glm::mat4 _globalTransform;
-		bool _isGlobalTransformNeedUpdate = true;
+		mutable glm::mat4 _globalTransform;
+		mutable bool _isGlobalTransformNeedUpdate = true;
 
 		RigidBodyPtr _rigidBody;
 	};

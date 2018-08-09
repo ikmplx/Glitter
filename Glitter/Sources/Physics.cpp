@@ -30,11 +30,7 @@ namespace MyGL
 	{
 		EntityPtr entityHardPtr = _entity.lock();
 		if (entityHardPtr) {
-			entityHardPtr->UpdateGlobalTransform();
 			worldTrans.setFromOpenGLMatrix(reinterpret_cast<const btScalar*>(&entityHardPtr->GetGlobalTransform()));
-			//auto origin = worldTrans.getOrigin();
-
-			//std::cout << origin.x() << " " << origin.y() << " " << origin.z() << "\n";
 		}
 	}
 	

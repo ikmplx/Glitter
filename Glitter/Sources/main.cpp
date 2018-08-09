@@ -16,6 +16,9 @@
 
 #include "imgui_impl_glfw_gl3.h"
 
+#include <gtest/gtest.h>
+
+
 // Define Some Constants
 const int mWidth = 1280;
 const int mHeight = 800;
@@ -103,8 +106,34 @@ static void MyProcessInput(GLFWwindow* window)
 	}
 }
 
-int main() 
+static bool TryTest(int argc, char** argv, bool& testOut) 
 {
+	bool found = false;
+	for (int i = 1; i < argc; i++) {
+		std::string s = argv[i];
+		if (s.find("--gtest") != std::string::npos) {
+			found = true;
+			break;
+		}
+	}
+
+	if (found) {
+		::testing::InitGoogleTest(&argc, argv);
+		testOut = RUN_ALL_TESTS();
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+int main(int argc, char** argv) 
+{
+	bool testOut;
+	if (TryTest(argc, argv, testOut)) {
+		return testOut;
+	}
+
 	// Load GLFW and Create a Window
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
