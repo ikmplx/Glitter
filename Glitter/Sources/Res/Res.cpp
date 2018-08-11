@@ -68,7 +68,7 @@ namespace MyGL
 		res->AddTexture("Awesome", "awesomeface.png");
 		res->AddTexture("Wood", "wood.png");
 
-		res->AddCubemap("Skybox", "skybox/", ".png", {"right", "left", "top", "bottom", "front", "back"});
+		res->AddCubemap("Skybox", "skybox/", ".jpg", {"right", "left", "top", "bottom", "front", "back"});
 	}
 
 	void ResourceManager::Deinitialize()
