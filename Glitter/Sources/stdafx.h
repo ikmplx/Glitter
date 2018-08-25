@@ -1,5 +1,7 @@
 #pragma once
 
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE
+
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>

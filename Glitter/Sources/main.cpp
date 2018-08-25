@@ -106,12 +106,20 @@ static void MyProcessInput(GLFWwindow* window)
 	}
 }
 
-static bool TryTest(int argc, char** argv, bool& testOut) 
+static bool TryTest(int argc, char** argv, char **envp, bool& testOut) 
 {
 	bool found = false;
 	for (int i = 1; i < argc; i++) {
 		std::string s = argv[i];
 		if (s.find("--gtest") != std::string::npos) {
+			found = true;
+			break;
+		}
+	}
+
+	while (!found && *envp) {
+		std::string envVar = *(envp++);
+		if (envVar.find("GTEST_") != std::string::npos) {
 			found = true;
 			break;
 		}
@@ -127,10 +135,10 @@ static bool TryTest(int argc, char** argv, bool& testOut)
 	}
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv, char **envp) 
 {
 	bool testOut;
-	if (TryTest(argc, argv, testOut)) {
+	if (TryTest(argc, argv, envp, testOut)) {
 		return testOut;
 	}
 
@@ -161,10 +169,10 @@ int main(int argc, char** argv)
 
 	gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress));
 
-	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
-	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VENDOR));
-	fprintf(stderr, "OpenGL %s\n", glGetString(GL_RENDERER));
-	fprintf(stderr, "OpenGL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	fprintf(stderr, "OpenGL %s\n", (const char*) glGetString(GL_VERSION));
+	fprintf(stderr, "OpenGL %s\n", (const char*) glGetString(GL_VENDOR));
+	fprintf(stderr, "OpenGL %s\n", (const char*) glGetString(GL_RENDERER));
+	fprintf(stderr, "OpenGL %s\n", (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
 	// fprintf(stderr, "OpenGL %s\n", glGetString(GL_EXTENSIONS));
 
 	MyGL::UboManager::Initialize();
