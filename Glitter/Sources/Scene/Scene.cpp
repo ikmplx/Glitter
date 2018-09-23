@@ -143,7 +143,7 @@ namespace MyGL
 			ComponentRemoved(entity, component);
 		}
 
-		_addingComponents.clear();
+		_removingComponents.clear();
 
 	}
 

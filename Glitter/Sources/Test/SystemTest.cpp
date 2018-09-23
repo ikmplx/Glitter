@@ -132,6 +132,8 @@ TEST(SystemTest, DeleteComponent)
 	scene->AddSystem(system);
 
 	MyGL::ComponentPtr component = std::make_shared<TestComponent1>();
+	MyGL::ComponentWeakPtr weakComponent = component;
+
 	auto entity = scene->CreateEntity();
 	scene->AddComponent(entity, component);
 	scene->Update(1.f);
@@ -140,6 +142,35 @@ TEST(SystemTest, DeleteComponent)
 
 	scene->RemoveComponent(entity, component);
 	scene->Update(1.f);
+
+	component = nullptr;
+	EXPECT_EQ(0, system->GetEntities().size());
+	EXPECT_TRUE(weakComponent.expired());
+}
+
+TEST(SystemTest, DeleteEntityWithOneComponent)
+{
+	auto scene = std::make_shared<MyGL::Scene>();
+	auto system = std::make_shared<TestSystem1>();
+
+	scene->AddSystem(system);
+	MyGL::ComponentPtr component = std::make_shared<TestComponent1>();
+	MyGL::ComponentWeakPtr weakComponent = component;
+
+	auto entity = scene->CreateEntity();
+	MyGL::EntityWeakPtr weakEntity = entity;
+
+	scene->AddComponent(entity, component);
+	scene->Update(1.f);
+
+	scene->RemoveEntity(entity);
+	scene->Update(1.f);
+
+	component = nullptr;
+	entity = nullptr;
+
+	EXPECT_TRUE(weakComponent.expired());
+	EXPECT_TRUE(weakEntity.expired());
 
 	EXPECT_EQ(0, system->GetEntities().size());
 }
