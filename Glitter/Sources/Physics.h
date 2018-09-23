@@ -3,56 +3,39 @@
 #pragma once
 
 #include "Forward.h"
+#include "Scene/System.h"
+#include "Scene/Component.h"
 
 namespace MyGL
 {
-	class Physics;
-
-	class RigidBody : private btMotionState
+	class PhysicsComponent : public Component
 	{
-		friend class Physics;
 	public:
-		RigidBody(EntityPtr entity, btCollisionShape* collisionShape, float mass);
-		~RigidBody();
+		PhysicsComponent(btCollisionShape* collisionShape, float mass);
 
-		bool IsPhysicsTransform() const;
+		btCollisionShape* collisionShape;
+		float mass = 0.f;
 
-	private:
-		virtual void getWorldTransform(btTransform& worldTrans) const override;
-		virtual void setWorldTransform(const btTransform& worldTrans) override;
-
-	private:
-		EntityWeakPtr _entity;
-
-		btRigidBody::btRigidBodyConstructionInfo _rbInfo;
-		btRigidBody* _rigidBody = nullptr;
-		bool _isTransformInitialized = false;
+		std::unique_ptr<btRigidBody> rigidBody;
+		std::unique_ptr<btMotionState> motionState;
 	};
 
-	class Physics
+	class PhysicsSystem : public System
 	{
 	public:
-		Physics();
-		~Physics();
+		PhysicsSystem();
+		~PhysicsSystem();
 
-		static void Initialize();
-		static void Deinitialize();
-		static Physics* Instance();
-
-		void Update(float dt);
-
-		void AddRigidBody(RigidBodyPtr rigidBody);
+		void Update(ScenePtr scene, float dt) override;
+		void BeforeEntityRemove(EntityPtr entity) override;
 
 	private:
-		static Physics* _sInstance;
+		btDefaultCollisionConfiguration* _collisionConfiguration = nullptr;
+		btCollisionDispatcher* _dispatcher = nullptr;
+		btBroadphaseInterface* _broadphase = nullptr;
+		btSequentialImpulseConstraintSolver* _solver = nullptr;
+		btDiscreteDynamicsWorld* _world = nullptr;
 
-		btDefaultCollisionConfiguration* _collisionConfiguration;
-		btCollisionDispatcher* _dispatcher;
-		btBroadphaseInterface* _broadphase;
-		btSequentialImpulseConstraintSolver* _solver;
-		btDiscreteDynamicsWorld* _world;
-	
-		std::vector<RigidBodyPtr> _addRigidBodies;
-		std::unordered_map<btRigidBody*, RigidBodyPtr> _rigidBodies;
+		std::unordered_map<EntityPtr, std::shared_ptr<PhysicsComponent>> _physicEntities;
 	};
 }

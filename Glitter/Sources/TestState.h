@@ -52,5 +52,9 @@ namespace MyGL
 
 		float _lightRotation = 0.f;
 		glm::vec3 _lightDir = glm::vec3(0.2f, -1.f, -1.f);
+
+		float _dropTimer = 0.1f;
+
+		std::unique_ptr<btBoxShape> _boxShape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
 	};
 }

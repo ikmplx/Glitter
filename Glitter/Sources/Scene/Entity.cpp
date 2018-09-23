@@ -19,18 +19,23 @@ namespace MyGL
 
 	const glm::mat4& Entity::GetGlobalTransform() const
 	{
-		if (_isGlobalTransformNeedUpdate && (_rigidBody == nullptr || !_rigidBody->IsPhysicsTransform())) {
-			_globalTransform = glm::mat4(1.f);
-
+		if (_isGlobalTransformNeedUpdate) {
 			EntityPtr parentEntity = _parent.lock();
 			if (parentEntity) {
 				_globalTransform = parentEntity->GetGlobalTransform();
+			} else {
+				_globalTransform = glm::mat4(1.f);
 			}
 
-			_globalTransform = glm::translate(_globalTransform, position);
-			_globalTransform *= glm::mat4_cast(rotation);
-			_globalTransform = glm::scale(_globalTransform, scale);
-
+			if (hasExternalTransform) {
+				// TODO: should manage scale with PhysicsSystem (or use child node for scaling mesh)
+				_globalTransform *= externalTransform;
+			}
+			else {
+				_globalTransform = glm::translate(_globalTransform, position);
+				_globalTransform *= glm::mat4_cast(rotation);
+				_globalTransform = glm::scale(_globalTransform, scale);
+			}
 			_isGlobalTransformNeedUpdate = false;
 		}
 
@@ -93,11 +98,6 @@ namespace MyGL
 	MaterialPtr Entity::GetMaterial()
 	{
 		return _material;
-	}
-
-	void Entity::SetRigidBody(RigidBodyPtr rigidBody)
-	{
-		_rigidBody = rigidBody;
 	}
 
 	void Entity::Draw(ShaderPtr shader)

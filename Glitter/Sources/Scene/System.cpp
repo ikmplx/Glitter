@@ -19,7 +19,9 @@ namespace MyGL
 		_componentTypes.push_back(componentTypes);
 	}
 
-	System::~System()
+	System::~System() = default;
+
+	void System::BeforeEntityRemove(EntityPtr entity)
 	{
 	}
 
@@ -42,6 +44,7 @@ namespace MyGL
 		}
 		else {
 			if (entity->_systemTypeSet.test(_systemTypeId)) {
+				BeforeEntityRemove(entity);
 				entity->_systemTypeSet.reset(_systemTypeId);
 				_entities.erase(std::remove(_entities.begin(), _entities.end(), entity), _entities.end());
 			}

@@ -23,6 +23,11 @@ namespace MyGL
 
 		void Assert(bool assertion);
 	}
+
+	namespace Math
+	{
+		int Random(int minIncl, int maxIncl);
+	}
 }
 
 #define GL_ERROR() ::MyGL::Utils::GlError(__FILE__, __LINE__)

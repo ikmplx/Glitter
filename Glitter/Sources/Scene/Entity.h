@@ -6,9 +6,11 @@
 
 namespace MyGL
 {
+	class PhysicsMotionState;
+
 	class Entity : public std::enable_shared_from_this<Entity>
 	{
-		friend class RigidBody;
+		friend class PhysicsMotionState;
 		friend class Scene;
 		friend class System;
 
@@ -33,19 +35,26 @@ namespace MyGL
 		void SetMaterial(MaterialPtr material);
 		MaterialPtr GetMaterial();
 
-		void SetRigidBody(RigidBodyPtr rigidBody);
-
 		void Draw(ShaderPtr shader);
 
 		void InvalidateTransform();
 
-	private:
 		ComponentPtr FindComponent(const std::type_info& typeInfo);
+
+		template <typename T>
+		std::shared_ptr<T> FindComponent()
+		{
+			return std::static_pointer_cast<T>(FindComponent(typeid(T)));
+		}
 
 	public:
 		glm::quat rotation = glm::angleAxis(0.f, glm::vec3(0, 0, 1));
 		glm::vec3 position = glm::vec3(0);
 		glm::vec3 scale = glm::vec3(1);
+
+		// TODO: can convert bullet's btTransform to rotation and position above and get rid of externalTransform
+		bool hasExternalTransform = false;
+		glm::mat4 externalTransform = glm::mat4(1.f);
 
 	private:
 		EntityWeakPtr _parent;
@@ -61,8 +70,6 @@ namespace MyGL
 
 		mutable glm::mat4 _globalTransform = glm::mat4(1.f);
 		mutable bool _isGlobalTransformNeedUpdate = true;
-
-		RigidBodyPtr _rigidBody;
 	};
 
 	template<typename Fun>

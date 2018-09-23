@@ -9,10 +9,15 @@ namespace MyGL
 	class System {
 	public:
 		System(std::initializer_list<ComponentType> componentTypes);
+		System(const System& other) = delete;
 		explicit System(ComponentType componentType);
+
 		virtual ~System();
 
 		virtual void Update(ScenePtr scene, float dt) = 0;
+
+		virtual void BeforeEntityRemove(EntityPtr entity);
+
 
 		void AddedToScene(ScenePtr scene, int systemTypeId);
 

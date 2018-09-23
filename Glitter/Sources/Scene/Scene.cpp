@@ -149,9 +149,15 @@ namespace MyGL
 
 	void Scene::CompleteChangingComponentsEntities()
 	{
+		std::set<Entity*> uniqueSet;
+
 		for (auto& c : _changingComponentsEntities) {
-			for (auto& system : _systems) {
-				system->EntityComponentsUpdated(c);
+			auto iter = uniqueSet.find(c.get());
+			if (iter == uniqueSet.end()) {
+				for (auto& system : _systems) {
+					system->EntityComponentsUpdated(c);
+					uniqueSet.insert(c.get());
+				}
 			}
 		}
 
@@ -172,7 +178,7 @@ namespace MyGL
 			entity->_componentTypeSet.set(componentTypeId);
 			entity->_components.push_back(component);
 
-			_changingComponentsEntities.insert(entity);
+			_changingComponentsEntities.push_back(entity);
 		}
 	}
 
@@ -190,7 +196,7 @@ namespace MyGL
 			entity->_componentTypeSet.reset(EnsureComponentTypeId(component));
 			entity->_components.erase(std::find(entity->_components.begin(), entity->_components.end(), component), entity->_components.end());
 
-			_changingComponentsEntities.insert(entity);
+			_changingComponentsEntities.push_back(entity);
 		}
 	}
 

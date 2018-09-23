@@ -55,7 +55,7 @@ namespace MyGL
 		std::vector<EntityPtr> _removingEntities;
 		std::vector<std::tuple<EntityPtr, ComponentPtr>> _removingComponents;
 
-		std::set<EntityPtr> _changingComponentsEntities;
+		std::vector<EntityPtr> _changingComponentsEntities;
 
 		std::vector<SystemPtr> _systems;
 

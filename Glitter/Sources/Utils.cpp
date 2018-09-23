@@ -1,11 +1,31 @@
 ﻿// ¯\_(ツ)_/¯
 #include "stdafx.h"
 
+#include <random>
+
 #include "Utils.h"
+#include <ctime>
 
 namespace MyGL
 {
- 
+	static std::mt19937 sGen;
+	static bool sGenInit = false;
+
+	static void Randomize()
+	{
+		if (!sGenInit) {
+			sGenInit = true;
+
+			sGen.seed((int) std::time(nullptr));
+		}
+	}
+
+	int Math::Random(int minIncl, int maxIncl)
+	{
+		Randomize();
+
+		return std::uniform_int_distribution<int>(minIncl, maxIncl)(sGen);
+	}
 }
 
 void MyGL::Utils::GlError(const char * file, int line)

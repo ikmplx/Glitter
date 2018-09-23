@@ -5,59 +5,51 @@
 #include "Physics.h"
 #include "Scene/Entity.h"
 #include "Utils.h"
+#include "Scene/Component.h"
 
 namespace MyGL
 {
-	RigidBody::RigidBody(EntityPtr entity, btCollisionShape* collisionShape, float mass)
-		: _rbInfo(mass, this, collisionShape)
-		, _entity(entity)
-	{
-		if (mass != 0.f) {
-			collisionShape->calculateLocalInertia(mass, _rbInfo.m_localInertia);
-		}
-	}
-
-	RigidBody::~RigidBody()
+	PhysicsComponent::PhysicsComponent(btCollisionShape* collisionShape, float mass)
+		: collisionShape(collisionShape)
+	    , mass(mass)
 	{
 	}
 
-	bool RigidBody::IsPhysicsTransform() const
+	class PhysicsMotionState : public btMotionState
 	{
-		return _rigidBody != nullptr && _isTransformInitialized;
-	}
-	
-	void RigidBody::getWorldTransform(btTransform& worldTrans) const
-	{
-		EntityPtr entityHardPtr = _entity.lock();
-		if (entityHardPtr) {
-			worldTrans.setFromOpenGLMatrix(reinterpret_cast<const btScalar*>(&entityHardPtr->GetGlobalTransform()));
-		}
-	}
-	
-	void RigidBody::setWorldTransform(const btTransform& worldTrans)
-	{
-		EntityPtr entityHardPtr = _entity.lock();
-		if (entityHardPtr) {
-			worldTrans.getOpenGLMatrix(reinterpret_cast<btScalar*>(&entityHardPtr->_globalTransform));
+	public:
+		explicit PhysicsMotionState(EntityPtr entity)
+			: _entity(std::move(entity))
+		{
 		}
 
-		_isTransformInitialized = true;
-	}
+		void getWorldTransform(btTransform& worldTrans) const override
+		{
+			worldTrans.setFromOpenGLMatrix(reinterpret_cast<const btScalar*>(&_entity->GetGlobalTransform()));
+		}
 
-	Physics* Physics::_sInstance;
+		void setWorldTransform(const btTransform& worldTrans) override
+		{
+			worldTrans.getOpenGLMatrix(reinterpret_cast<btScalar*>(&_entity->externalTransform));
+			_entity->hasExternalTransform = true;
+			_entity->InvalidateTransform();
+		}
 
-	Physics::Physics()
+	private:
+		EntityPtr _entity;
+	};
+
+	PhysicsSystem::PhysicsSystem()
+		: System(typeid(PhysicsComponent))
 	{
 		_collisionConfiguration = new btDefaultCollisionConfiguration();
 		_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
 		_broadphase = new btDbvtBroadphase();
 		_solver = new btSequentialImpulseConstraintSolver();
 		_world = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
-
-		//_world->setGravity(btVector3(0.f, -9.8f, 0.f));
 	}
 
-	Physics::~Physics()
+	PhysicsSystem::~PhysicsSystem()
 	{
 		delete _world;
 		delete _solver;
@@ -66,38 +58,38 @@ namespace MyGL
 		delete _collisionConfiguration;
 	}
 
-	void Physics::Initialize()
+	void PhysicsSystem::Update(ScenePtr scene, float dt)
 	{
-		_sInstance = new Physics();
-	}
+		for (auto& entity : GetEntities()) {
+			auto comp = entity->FindComponent<PhysicsComponent>();
 
-	void Physics::Deinitialize()
-	{
-		delete _sInstance;
-	}
+			if (!comp->rigidBody) {
+				comp->motionState = std::make_unique<PhysicsMotionState>(entity);
+				btRigidBody::btRigidBodyConstructionInfo rbInfo(comp->mass, comp->motionState.get(), comp->collisionShape);
+				if (comp->mass != 0.f) {
+					comp->collisionShape->calculateLocalInertia(comp->mass, rbInfo.m_localInertia);
+				}
+				
+				comp->rigidBody  = std::make_unique<btRigidBody>(rbInfo);
 
-	Physics* Physics::Instance()
-	{
-		return _sInstance;
-	}
-
-	void Physics::Update(float dt)
-	{
-		for (auto& rigidBody : _addRigidBodies) {
-			rigidBody->_rigidBody = new btRigidBody(rigidBody->_rbInfo);
-			_world->addRigidBody(rigidBody->_rigidBody);
-
-			auto emplaceResult = _rigidBodies.emplace(rigidBody->_rigidBody, rigidBody);
-
-			MyAssert(emplaceResult.second);
+				_world->addRigidBody(comp->rigidBody.get());
+				_physicEntities[entity] = comp;
+			}
 		}
-		_addRigidBodies.clear();
 
 		_world->stepSimulation(dt, 2);
 	}
 
-	void Physics::AddRigidBody(RigidBodyPtr rigidBody)
+	void PhysicsSystem::BeforeEntityRemove(EntityPtr entity)
 	{
-		_addRigidBodies.push_back(rigidBody);
+		auto iter = _physicEntities.find(entity);
+		if (iter != _physicEntities.end()) {
+			auto& comp = iter->second;
+			_world->removeRigidBody(comp->rigidBody.get());
+			comp->rigidBody = nullptr;
+			comp->motionState = nullptr;
+
+			_physicEntities.erase(iter);
+		}
 	}
 }

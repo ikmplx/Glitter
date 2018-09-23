@@ -10,7 +10,7 @@ ExternalProject_Add(gtest
 add_dependencies(Glitter gtest)
 
 include_directories(${GTEST_INSTALL_DIR}/include)
-target_link_libraries(Glitter ${GTEST_INSTALL_DIR}/lib/gtestd${CMAKE_STATIC_LIBRARY_SUFFIX})
+target_link_libraries(Glitter ${GTEST_INSTALL_DIR}/lib/gtest${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 enable_testing()
 add_test(NAME GlitterTest COMMAND Glitter --gtest)

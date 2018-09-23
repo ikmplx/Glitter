@@ -37,8 +37,11 @@ namespace MyGL
 		virtual void Update(ScenePtr scene, float dt) override
 		{
 			for (auto& entity : GetEntities()) {
-				if (entity->GetGlobalPosition().y < -10) {
+				if (entity->GetGlobalPosition().y < -100) {
 					scene->RemoveEntity(entity);
+
+
+
 				}
 			}
 		}
@@ -57,33 +60,16 @@ namespace MyGL
 		// Plane
 		_floorEntity = _scene->CreateEntity(_floorEntity);
 
-		auto floorPlaneMesh = Primitives::CreatePlane(100.f, 100.f, 0.1f);
+		auto floorPlaneMesh = Primitives::CreatePlane(20.f, 20.f, 0.1f);
 		_floorEntity->SetMesh(floorPlaneMesh);
 		_floorEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Wood")));
 		_floorEntity->GetMaterial()->specularBase = 0.3f;
 
-		btBoxShape* floorShape = new btBoxShape(btVector3(50.f, 0.1f, 50.f));
-		RigidBodyPtr floorBody = std::make_shared<RigidBody>(_floorEntity, floorShape, 0.f);
-		_floorEntity->SetRigidBody(floorBody);
-		Physics::Instance()->AddRigidBody(floorBody);
+		btBoxShape* floorShape = new btBoxShape(btVector3(10.f, 0.1f, 10.f));
+		ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(floorShape, 0.f);
 
-		// Box
-		btBoxShape* boxShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-		for (int i = 0; i < 100; i++) {
-			auto boxEntity = _scene->CreateEntity();
-			_scene->AddComponent(boxEntity, ComponentPtr(new TestComponent()));
+		_scene->AddComponent(_floorEntity, physicsComponent);
 
-			auto boxMesh = Primitives::CreateCube();
-			boxEntity->SetMesh(boxMesh);
-			boxEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
-
-			RigidBodyPtr boxBody = std::make_shared<RigidBody>(boxEntity, boxShape, 1.f);
-			boxEntity->SetRigidBody(boxBody);
-			Physics::Instance()->AddRigidBody(boxBody);
-
-			boxEntity->position = glm::vec3(0.f, 10.f + i * 1.5f, 12.f);
-			boxEntity->rotation = glm::angleAxis(1.1f + i, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
-		}
 	}
 
 	void TestState::Init()
@@ -106,6 +92,7 @@ namespace MyGL
 
 		_scene = std::make_shared<MyGL::Scene>();
 		_scene->AddSystem(std::make_shared<TestSystem>());
+		_scene->AddSystem(std::make_shared<PhysicsSystem>());
 
 		_centerEntity = _scene->CreateEntity();
 
@@ -131,19 +118,15 @@ namespace MyGL
 		_framebufferPass2->AttachColor(_colorPass2 = std::make_shared<Attachment>(_vpWidth, _vpHeight, Attachment::Type::RGB, true));
 		_framebufferPass2->AttachDepth(_deferredRenderer->GetDepth());
 
-		Physics::Initialize();
 		CreatePhysicObjects();
 	}
 
 	void TestState::Deinit()
 	{
-		Physics::Deinitialize();
 	}
 
 	void TestState::Update(float dt)
 	{
-		Physics::Instance()->Update(dt);
-
 		const float secondsPerTick = 1.f / 60.f;
 
 		_gameTimeAcc += dt;
@@ -161,6 +144,24 @@ namespace MyGL
 		_lightDir = lightRotation * lightDir;
 
 		_scene->Update(dt);
+
+		_dropTimer -= dt;
+		while (_dropTimer <= 0) {
+			_dropTimer += 0.02f;
+
+			auto boxEntity = _scene->CreateEntity();
+			_scene->AddComponent(boxEntity, std::make_shared<TestComponent>());
+
+			auto boxMesh = Primitives::CreateCube();
+			boxEntity->SetMesh(boxMesh);
+			boxEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
+
+			ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
+			_scene->AddComponent(boxEntity, physicsComponent);
+
+			boxEntity->position = glm::vec3(Math::Random(-3, 3), 40.f, Math::Random(-3, 3));
+			// boxEntity->rotation = glm::angleAxis(1.1f + i, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
+		}
 	}
 
 	void TestState::Draw()
