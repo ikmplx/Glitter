@@ -97,9 +97,9 @@ namespace MyGL
 			loader.SetTransform(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1, 0, 0)));
 			_towerPrefab = loader.Load("Models/vox/chr_sword.ply");
 
-			_towerPrefab->Traverse([](Entity& entity) {
-				if (entity.GetMesh()) {
-					entity.GetMaterial()->specularBase = 0.5f;
+			_towerPrefab->Traverse([](EntityPtr entity) {
+				if (entity->GetMesh()) {
+					entity->GetMaterial()->specularBase = 0.5f;
 				}
 			});
 		}

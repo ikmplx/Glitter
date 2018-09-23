@@ -66,8 +66,8 @@ namespace MyGL
 
 	void Scene::Draw(ShaderPtr shader)
 	{
-		_rootEntity->Traverse([&shader](Entity& entity) {
-			entity.Draw(shader);
+		_rootEntity->Traverse([&shader](EntityPtr entity) {
+			entity->Draw(shader);
 		});
 	}
 
@@ -96,8 +96,8 @@ namespace MyGL
 				parent->_children.push_back(addingEntity);
 			}
 
-			addingEntity->Traverse([this](Entity& ent) {
-				EntityAdded(ent.shared_from_this());
+			addingEntity->Traverse([this](EntityPtr ent) {
+				EntityAdded(ent);
 			});
 		}
 
@@ -126,8 +126,8 @@ namespace MyGL
 				children.erase(std::remove(children.begin(), children.end(), removingEntity), children.end());
 				removingEntity->_parent.reset();
 
-				removingEntity->Traverse([this](Entity& ent) {
-					EntityRemoved(ent.shared_from_this());
+				removingEntity->Traverse([this](EntityPtr ent) {
+					EntityRemoved(ent);
 				});
 			}
 		}

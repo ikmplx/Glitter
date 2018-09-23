@@ -95,7 +95,7 @@ namespace MyGL
 		}
 
 		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath, geomPath);
-		Add(std::static_pointer_cast<Resource>(shader));
+		Add(shader);
 		return shader;
 	}
 
@@ -106,7 +106,7 @@ namespace MyGL
 		std::string geomPath;
 
 		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath, geomPath);
-		Add(std::static_pointer_cast<Resource>(shader));
+		Add(shader);
 		return shader;
 
 	}

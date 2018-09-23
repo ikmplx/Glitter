@@ -8,7 +8,8 @@ namespace MyGL
 {
 	class System {
 	public:
-		System(ComponentType componentTypes);
+		System(std::initializer_list<ComponentType> componentTypes);
+		explicit System(ComponentType componentType);
 		virtual ~System();
 
 		virtual void Update(ScenePtr scene, float dt) = 0;
@@ -27,7 +28,7 @@ namespace MyGL
 
 		ComponentTypeSet _componentTypeSet;
 
-		int _systemTypeId;
+		int _systemTypeId = -1;
 	};
 	using SystemPtr = std::shared_ptr<System>;
 }

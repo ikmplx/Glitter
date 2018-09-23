@@ -68,7 +68,7 @@ namespace MyGL
 	template<typename Fun>
 	inline void Entity::Traverse(Fun fun)
 	{
-		fun(*this);
+		fun(shared_from_this());
 		for (auto& child : _children) {
 			child->Traverse(fun);
 		}

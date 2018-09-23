@@ -9,6 +9,11 @@
 
 namespace MyGL
 {
+	System::System(std::initializer_list<ComponentType> componentTypes)
+	{
+		_componentTypes.assign(componentTypes.begin(), componentTypes.end());
+	}
+
 	System::System(ComponentType componentTypes)
 	{
 		_componentTypes.push_back(componentTypes);
