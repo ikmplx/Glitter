@@ -43,9 +43,9 @@ namespace MyGL
 		ComponentPtr FindComponent(const std::type_info& typeInfo);
 
 	public:
-		glm::quat rotation;
-		glm::vec3 position;
-		glm::vec3 scale;
+		glm::quat rotation = glm::angleAxis(0.f, glm::vec3(0, 0, 1));
+		glm::vec3 position = glm::vec3(0);
+		glm::vec3 scale = glm::vec3(1);
 
 	private:
 		EntityWeakPtr _parent;
@@ -59,7 +59,7 @@ namespace MyGL
 		ComponentTypeSet _componentTypeSet;
 		SystemTypeSet _systemTypeSet;
 
-		mutable glm::mat4 _globalTransform;
+		mutable glm::mat4 _globalTransform = glm::mat4(1.f);
 		mutable bool _isGlobalTransformNeedUpdate = true;
 
 		RigidBodyPtr _rigidBody;

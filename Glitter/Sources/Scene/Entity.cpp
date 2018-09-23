@@ -2,7 +2,6 @@
 #include "stdafx.h"
 
 #include "Entity.h"
-#include "Utils.h"
 #include "Res/Shader.h"
 #include "Model/Mesh.h"
 #include "Component.h"
@@ -12,10 +11,7 @@
 namespace MyGL
 {
 	Entity::Entity()
-		: position(glm::vec3(0))
-		, scale(glm::vec3(1))
-		, rotation(glm::angleAxis(0.f, glm::vec3(0, 0, 1)))
-		, _material(new Material())
+		: _material(new Material())
 	{
 	}
 
@@ -125,7 +121,8 @@ namespace MyGL
 	ComponentPtr Entity::FindComponent(const std::type_info & typeInfo)
 	{
 		for (const auto& component : _components) {
-			if (typeid(*component) == typeInfo) {
+			auto& ref = *component.get();
+			if (typeid(ref) == typeInfo) {
 				return component;
 			}
 		}
