@@ -153,13 +153,13 @@ int main(int argc, char** argv, char **envp)
 
 	auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
 
-	glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 	// Check for Valid Context
 	if (mWindow == nullptr) {
 		fprintf(stderr, "Failed to Create OpenGL Context");
 		return EXIT_FAILURE;
 	}
+
+	glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Create Context and Load OpenGL Functions
 	glfwMakeContextCurrent(mWindow);
@@ -167,7 +167,10 @@ int main(int argc, char** argv, char **envp)
 	// V-Sync
 	glfwSwapInterval(1);
 
-	gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress));
+	if (!gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress))) {
+		fprintf(stderr, "Failed to Load OpenGL");
+		return EXIT_FAILURE;
+	}
 
 	fprintf(stderr, "OpenGL %s\n", (const char*) glGetString(GL_VERSION));
 	fprintf(stderr, "OpenGL %s\n", (const char*) glGetString(GL_VENDOR));

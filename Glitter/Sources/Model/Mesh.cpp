@@ -12,9 +12,9 @@ namespace MyGL
 		: vertices(vertices)
 		, indices(indices)
 	{
-		glCreateVertexArrays(1, &_vao);
-		glCreateBuffers(1, &_vbo);
-		glCreateBuffers(1, &_ibo);
+		glGenVertexArrays(1, &_vao);
+		glGenBuffers(1, &_vbo);
+		glGenBuffers(1, &_ibo);
 
 		glBindVertexArray(_vao);
 
