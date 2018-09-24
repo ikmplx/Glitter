@@ -21,7 +21,7 @@ endif()
 
 include_directories(Glitter/Sources/
 #                    Glitter/Vendor/assimp/include/
-                    Glitter/Vendor/glad/include/
+                    Glitter/Vendor/glad/
                     Glitter/Vendor/glm/
                     Glitter/Vendor/stb/
                     
@@ -31,8 +31,7 @@ include_directories(Glitter/Sources/
 					Glitter/Vendor/imgui_impl/
 					)
 
-file(GLOB VENDORS_SOURCES Glitter/Vendor/glad/src/glad.c 
-                          Glitter/Vendor/imgui/imgui*.cpp
+file(GLOB VENDORS_SOURCES Glitter/Vendor/imgui/imgui*.cpp
                           Glitter/Vendor/imgui_impl/*.cpp)
 
 file(GLOB_RECURSE PROJECT_SOURCES Glitter/Sources/*.cpp )
@@ -60,7 +59,7 @@ if (MSVC)
 
     set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/Yu")
     set_source_files_properties(Glitter/Sources/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yc")
-    set_source_files_properties(Glitter/Sources/stb.cpp PROPERTIES COMPILE_FLAGS "/Y- /Ox")
+    set_source_files_properties(Glitter/Sources/impl.cpp PROPERTIES COMPILE_FLAGS "/Y- /Ox")
 
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

@@ -167,7 +167,7 @@ int main(int argc, char** argv, char **envp)
 	// V-Sync
 	glfwSwapInterval(1);
 
-	if (!gladLoadGLLoader((GLADloadproc)(&glfwGetProcAddress))) {
+	if (!gladLoadGL((GLADloadfunc)(&glfwGetProcAddress))) {
 		fprintf(stderr, "Failed to Load OpenGL");
 		return EXIT_FAILURE;
 	}
