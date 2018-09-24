@@ -174,11 +174,11 @@ namespace MyGL
 		// _centerEntity->InvalidateTransform();
 
 		glm::mat4 view = GetCamera().GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(45.f), (float)_vpWidth / _vpHeight, 1.f, 500.f);
+		glm::mat4 proj = GetProjMatrix();
 
 		{
 			glm::mat4 combined = proj * view;
-			glm::mat4 combinedNoDir = glm::mat4(glm::mat3(combined));
+			glm::mat4 combinedNoDir = proj * glm::mat4(glm::mat3(view));
 
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 0, proj);
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 1, view);
@@ -274,6 +274,35 @@ namespace MyGL
 		}
 	}
 
+	void TestState::MouseDown(int button, float x, float y)
+	{
+		auto boxEntity = _scene->CreateEntity();
+		_scene->AddComponent(boxEntity, std::make_shared<TestComponent>());
+
+		auto boxMesh = Primitives::CreateCube();
+		boxEntity->SetMesh(boxMesh);
+		boxEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
+
+		auto physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
+		_scene->AddComponent(boxEntity, physicsComponent);
+
+		glm::vec3 dir;
+
+		if (button == 1) {
+			dir = CameraRay(x, y);
+		} else if (button == 0) {
+			dir = _camera->GetDirection();
+		}
+
+		boxEntity->position = _camera->GetPosition() + dir * 2.f;
+		physicsComponent->pendingImpulse = dir * 70.f;
+	}
+
+	void TestState::MouseUp(int button, float x, float y)
+	{
+
+	}
+
 	void TestState::CreateFramebuffer()
 	{
 	}
@@ -315,5 +344,20 @@ namespace MyGL
 	glm::vec3 TestState::Gamma(const glm::vec3 & color)
 	{
 		return glm::pow(color, glm::vec3(_gamma));
+	}
+
+	glm::mat4 TestState::GetProjMatrix() const
+	{
+		return glm::perspective(glm::radians(45.f), (float)_vpWidth / _vpHeight, 1.f, 500.f);
+	}
+
+	glm::vec3 TestState::CameraRay(float x, float y) const
+	{
+		glm::vec4 clipPos(2.f * x / _vpWidth - 1.f, 1.f - 2.f * y / _vpHeight, 0.5f, 1.f);
+		glm::mat4 unprojectMat = glm::inverse(GetProjMatrix() * glm::mat4(glm::mat3(GetCamera().GetViewMatrix())));
+		glm::vec4 worldPos = unprojectMat * clipPos;
+		worldPos /= worldPos.w;
+
+		return glm::normalize(glm::vec3(worldPos));
 	}
 }

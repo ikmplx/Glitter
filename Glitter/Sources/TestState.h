@@ -18,6 +18,10 @@ namespace MyGL
 		virtual void Update(float dt) override;
 		virtual void Draw() override;
 
+		virtual void MouseDown(int button, float x, float y) override;
+		virtual void MouseUp(int button, float x, float y) override;
+
+
 	private:
 		void UpdateGame(float dt);
 
@@ -27,6 +31,9 @@ namespace MyGL
 		void DrawSkybox();
 		void DrawFullscreen();
 		glm::vec3 Gamma(const glm::vec3& color);
+
+		glm::mat4 GetProjMatrix() const;
+		glm::vec3 CameraRay(float x, float y) const;
 
 	private:
 		float _gamma = 2.2f;

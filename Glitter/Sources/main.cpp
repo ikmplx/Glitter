@@ -35,6 +35,13 @@ static void MyMouseButtonCallback(GLFWwindow* window, int button, int action, in
 {
 	if (isImGuiActive)
 		ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
+	else {
+		if (action == GLFW_PRESS) {
+			sCurrentState->MouseDown(button, xCursor, yCursor);
+		} else {
+			sCurrentState->MouseUp(button, xCursor, yCursor);
+		}
+	}
 }
 
 static void MyScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
@@ -244,6 +251,8 @@ int main(int argc, char** argv, char **envp)
 
 		ImGui::Text("FPS: %.2lf", fpsCounter.lastFps);
 		ImGui::Text("Frame limiter: %.2lf", frameLimiterActive);
+
+		ImGui::Text("Cursor: %f %f", xCursor, yCursor);
 
 		ImGui::Render();
 

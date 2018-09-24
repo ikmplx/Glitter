@@ -16,6 +16,8 @@ namespace MyGL
 		btCollisionShape* collisionShape;
 		float mass = 0.f;
 
+		glm::vec3 pendingImpulse = glm::vec3(0, 0, 0);
+
 		std::unique_ptr<btRigidBody> rigidBody;
 		std::unique_ptr<btMotionState> motionState;
 	};

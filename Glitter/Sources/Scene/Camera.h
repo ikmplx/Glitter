@@ -27,6 +27,7 @@ namespace MyGL
 
 		glm::mat4 GetViewMatrix() const;
 		glm::vec3 GetPosition() const;
+		glm::vec3 GetDirection() const;
 
 	private:
 		void RecalcQuat();

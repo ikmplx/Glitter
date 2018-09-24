@@ -58,6 +58,11 @@ namespace MyGL
 		return _position;
 	}
 
+	glm::vec3 Camera::GetDirection() const
+	{
+		return glm::vec3(0, 0, -1) * glm::inverse(_rotation);
+	}
+
 	void Camera::RecalcQuat()
 	{
 		_rotation = glm::angleAxis(_yaw, glm::vec3(0.f, 1.f, 0.f)) * glm::angleAxis(_pitch, glm::vec3(1.f, 0.f, 0.f));

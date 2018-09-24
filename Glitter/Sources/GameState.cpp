@@ -26,6 +26,14 @@ namespace MyGL
 	{
 	}
 
+	void GameState::MouseDown(int button, float x, float y)
+	{
+	}
+
+	void GameState::MouseUp(int button, float x, float y)
+	{
+	}
+
 	void GameState::SetViewportSize(int width, int height)
 	{
 		_vpWidth = width;
@@ -36,4 +44,10 @@ namespace MyGL
 	{
 		return *_camera;
 	}
+
+	const Camera& GameState::GetCamera() const
+	{
+		return *_camera;
+	}
+
 }

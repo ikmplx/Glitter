@@ -18,9 +18,13 @@ namespace MyGL
 		virtual void Update(float dt);
 		virtual void Draw();
 
+		virtual void MouseDown(int button, float x, float y);
+		virtual void MouseUp(int button, float x, float y);
+
 		void SetViewportSize(int width, int height);
 
 		Camera& GetCamera();
+		const Camera& GetCamera() const;
 
 	protected:
 		std::unique_ptr<Camera> _camera;

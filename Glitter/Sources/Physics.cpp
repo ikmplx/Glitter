@@ -75,6 +75,10 @@ namespace MyGL
 				_world->addRigidBody(comp->rigidBody.get());
 				_physicEntities[entity] = comp;
 			}
+
+			glm::vec3& impulse = comp->pendingImpulse;
+			comp->rigidBody->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
+			impulse = glm::vec3(0.f, 0.f, 0.f);
 		}
 
 		_world->stepSimulation(dt, 2);
