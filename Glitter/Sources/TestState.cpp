@@ -60,12 +60,12 @@ namespace MyGL
 		// Plane
 		_floorEntity = _scene->CreateEntity(_floorEntity);
 
-		auto floorPlaneMesh = Primitives::CreatePlane(20.f, 20.f, 0.1f);
+		auto floorPlaneMesh = Primitives::CreatePlane(50.f, 50.f, 0.1f);
 		_floorEntity->SetMesh(floorPlaneMesh);
 		_floorEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Wood")));
 		_floorEntity->GetMaterial()->specularBase = 0.3f;
 
-		btBoxShape* floorShape = new btBoxShape(btVector3(10.f, 0.1f, 10.f));
+		btBoxShape* floorShape = new btBoxShape(btVector3(25.f, 0.1f, 25.f));
 		ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(floorShape, 0.f);
 
 		_scene->AddComponent(_floorEntity, physicsComponent);
@@ -146,7 +146,7 @@ namespace MyGL
 		_scene->Update(dt);
 
 		_dropTimer -= dt;
-		while (_dropTimer <= 0) {
+		while (_dropTimer <= 0 && _dropCount-- > 0) {
 			_dropTimer += 0.02f;
 
 			auto boxEntity = _scene->CreateEntity();
@@ -159,8 +159,8 @@ namespace MyGL
 			ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
 			_scene->AddComponent(boxEntity, physicsComponent);
 
-			boxEntity->position = glm::vec3(Math::Random(-3, 3), 40.f, Math::Random(-3, 3));
-			// boxEntity->rotation = glm::angleAxis(1.1f + i, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
+			boxEntity->position = glm::vec3(_dropCount % 6 - 3, 80.f, _dropCount % 6 - 3);
+			boxEntity->rotation = glm::angleAxis(1.1f + _dropCount, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
 		}
 	}
 
