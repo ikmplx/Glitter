@@ -60,6 +60,19 @@ namespace MyGL
 		glDeleteBuffers(1, &_ibo);
 	}
 
+	void Mesh::FillBulletMeshInterface(btTriangleIndexVertexArray& btArray)
+	{
+		auto btMesh = std::make_unique<btIndexedMesh>();
+		btMesh->m_numTriangles = int(indices.size() / 3);
+		btMesh->m_triangleIndexBase = reinterpret_cast<const unsigned char *>(indices.data());
+		btMesh->m_triangleIndexStride = 3 * sizeof(int);
+		btMesh->m_numVertices = int(vertices.size());
+		btMesh->m_vertexBase = reinterpret_cast<const unsigned char *>(vertices.data());
+		btMesh->m_vertexStride = sizeof(Vertex);
+
+		btArray.addIndexedMesh(*btMesh);
+	}
+
 	void Mesh::Draw(ShaderPtr shader)
 	{
 		shader->Bind();

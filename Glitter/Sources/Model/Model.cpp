@@ -193,4 +193,3 @@ namespace MyGL
 		d->hasTransform = true;
 	}
 }
-

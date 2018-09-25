@@ -70,6 +70,14 @@ namespace MyGL
 
 		_scene->AddComponent(_floorEntity, physicsComponent);
 
+		// Tower
+		_towerEntity = _towerPrefab->Clone();
+		_towerEntity->position += glm::vec3(0, 0, 0);
+
+		_scene->AddEntity(_towerEntity, _centerEntity);
+
+		ComponentPtr towerPhysicsComponent = std::make_shared<PhysicsComponent>(_testShape->shape.get(), 0.f);
+		_scene->AddComponent(_towerEntity, towerPhysicsComponent);
 	}
 
 	void TestState::Init()
@@ -88,6 +96,8 @@ namespace MyGL
 					entity->GetMaterial()->specularBase = 0.5f;
 				}
 			});
+
+			_testShape = PhysicsSystem::CreateTriangleShape(_towerPrefab);
 		}
 
 		_scene = std::make_shared<MyGL::Scene>();
@@ -106,12 +116,9 @@ namespace MyGL
 		_nanosuitEntity1->rotation = glm::angleAxis(glm::radians(35.f), glm::vec3(0, 1, 0));
 		_nanosuitEntity2->rotation = glm::angleAxis(glm::radians(-35.f), glm::vec3(0, 1, 0));
 		*/
-		_towerEntity = _towerPrefab->Clone();
-		_towerEntity->position += glm::vec3(0, 0, -10);
 
 		//_scene->AddEntity(_nanosuitEntity1, _centerEntity);
 		//_scene->AddEntity(_nanosuitEntity2, _centerEntity);
-		_scene->AddEntity(_towerEntity, _centerEntity);
 
 		_deferredRenderer = std::make_shared<DeferredRenderer>(_vpWidth, _vpHeight);
 		_framebufferPass2 = std::make_shared<Framebuffer>();

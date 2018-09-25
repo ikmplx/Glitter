@@ -24,6 +24,8 @@ namespace MyGL
 		Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices);
 		~Mesh();
 
+		void FillBulletMeshInterface(btTriangleIndexVertexArray& btArray);
+
 		void Draw(ShaderPtr shader);
 		void Draw();
 
@@ -33,6 +35,7 @@ namespace MyGL
 		GLuint _vao;
 		GLuint _vbo;
 		GLuint _ibo;
+
 	};
 	using MeshPtr = std::shared_ptr<Mesh>;
 

@@ -4,6 +4,7 @@
 
 #include "Physics.h"
 #include "Scene/Entity.h"
+#include "Model/Mesh.h"
 #include "Utils.h"
 #include "Scene/Component.h"
 
@@ -96,4 +97,21 @@ namespace MyGL
 			_physicEntities.erase(iter);
 		}
 	}
+
+	TriangleShapeHolderPtr PhysicsSystem::CreateTriangleShape(const EntityPtr& entity)
+	{
+		TriangleShapeHolderPtr shapeHolder = std::make_shared<TriangleShapeHolder>();
+		shapeHolder->array = std::make_unique<btTriangleIndexVertexArray>();
+
+		entity->Traverse([&shapeHolder](const EntityPtr& entity) {
+			if (entity->GetMesh()) {
+				shapeHolder->sourceMeshes.push_back(entity->GetMesh());
+				entity->GetMesh()->FillBulletMeshInterface(*shapeHolder->array);
+			}
+		});
+
+		shapeHolder->shape = std::make_unique<btBvhTriangleMeshShape>(shapeHolder->array.get(), false);
+		return shapeHolder;
+	}
+
 }

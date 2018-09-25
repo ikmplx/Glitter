@@ -64,5 +64,6 @@ namespace MyGL
 		int _dropCount = 100;
 
 		std::unique_ptr<btBoxShape> _boxShape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
+		TriangleShapeHolderPtr _testShape;
 	};
 }

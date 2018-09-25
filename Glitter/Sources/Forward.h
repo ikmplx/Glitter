@@ -36,6 +36,9 @@ namespace MyGL
 
 	enum class TextureUsage;
 
+	struct TriangleShapeHolder;
+	using TriangleShapeHolderPtr = std::shared_ptr<TriangleShapeHolder>;
+
 	// ECS
 
 	class Scene;

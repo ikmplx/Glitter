@@ -8,6 +8,14 @@
 
 namespace MyGL
 {
+	struct TriangleShapeHolder
+	{
+		std::vector<MeshPtr> sourceMeshes;
+		std::unique_ptr<btTriangleIndexVertexArray> array;
+		std::unique_ptr<btBvhTriangleMeshShape> shape;
+	};
+	using TriangleShapeHolderPtr = std::shared_ptr<TriangleShapeHolder>;
+
 	class PhysicsComponent : public Component
 	{
 	public:
@@ -30,6 +38,8 @@ namespace MyGL
 
 		void Update(ScenePtr scene, float dt) override;
 		void BeforeEntityRemove(EntityPtr entity) override;
+
+		static TriangleShapeHolderPtr CreateTriangleShape(const EntityPtr& entity);
 
 	private:
 		btDefaultCollisionConfiguration* _collisionConfiguration = nullptr;
