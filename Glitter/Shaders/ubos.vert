@@ -16,3 +16,8 @@ layout (std140) uniform Matrices
 	mat4 view;
 	mat4 combined;
 };
+
+layout (std140) uniform Scalars
+{
+	float gamma;
+};

@@ -11,7 +11,6 @@
 namespace MyGL
 {
 	Entity::Entity()
-		: _material(new Material())
 	{
 	}
 
@@ -100,12 +99,10 @@ namespace MyGL
 		return _material;
 	}
 
-	void Entity::Draw(ShaderPtr shader)
+	void Entity::Draw()
 	{
-		if (_mesh) {
-			shader->Bind();
-			shader->SetMatrix("model", GetGlobalTransform());
-			_material->Bind(shader);
+		if (_mesh && _material) {
+			_material->Bind(GetGlobalTransform());
 			_mesh->Draw();
 		}
 	}

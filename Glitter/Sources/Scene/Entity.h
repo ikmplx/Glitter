@@ -35,7 +35,7 @@ namespace MyGL
 		void SetMaterial(MaterialPtr material);
 		MaterialPtr GetMaterial();
 
-		void Draw(ShaderPtr shader);
+		void Draw();
 
 		void InvalidateTransform();
 

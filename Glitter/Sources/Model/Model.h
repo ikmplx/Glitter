@@ -16,6 +16,7 @@ namespace MyGL
 		static EntityPtr LoadModel(const std::string& path);
 
 		void SetTransform(const glm::mat4& transform);
+		void SpecularBase(float specularBase);
 
 	private:
 		std::unique_ptr<ModelLoaderPrivate> d;

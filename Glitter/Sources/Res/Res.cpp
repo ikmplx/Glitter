@@ -55,8 +55,9 @@ namespace MyGL
 
 		auto res = _sInstance;
 
-		res->AddShader("Pass1", "pass1");
-		res->AddShader("Skybox", "skybox");
+		res->AddShader("SurfaceStandard", "pass1", "SurfaceStandard");
+		res->AddShader("SurfaceVertexColor", "pass1", "SurfaceVertexColor");
+		res->AddShader("Skybox", "skybox", "skybox");
 		res->AddVPQuadShader("vpquad", "vpquad");
 
 		res->AddVPQuadShader("Pass2", "pass2");
@@ -84,17 +85,12 @@ namespace MyGL
 		return _sInstance;
 	}
 
-	ShaderPtr ResourceManager::AddShader(const std::string& name, const std::string& baseName, bool useGeometry)
+	ShaderPtr ResourceManager::AddShader(const std::string& name, const std::string& vertName, const std::string& fragName)
 	{
-		std::string fragPath = std::string("Shaders/") + baseName + std::string(".frag");
-		std::string vertPath = std::string("Shaders/") + baseName + std::string(".vert");
-		std::string geomPath;
+		std::string fragPath = std::string("Shaders/") + fragName + std::string(".frag");
+		std::string vertPath = std::string("Shaders/") + vertName + std::string(".vert");
 
-		if (useGeometry) {
-			geomPath = std::string("Shaders/") + baseName + std::string(".geom");
-		}
-
-		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath, geomPath);
+		ShaderPtr shader = std::make_shared<Shader>(name, vertPath, fragPath);
 		Add(shader);
 		return shader;
 	}

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include "Utils.h"
 
 namespace {
 	std::string ReadFile(const char* filename)
@@ -73,12 +74,12 @@ namespace MyGL
 {
 	namespace UboManager
 	{
-		static GLuint ubos[3];
+		static GLuint ubos[4];
 
 		void Initialize()
 		{
 			// Matrices
-			glGenBuffers(3, ubos);
+			glGenBuffers(4, ubos);
 
 			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_MATRICES]);
 			glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
@@ -93,10 +94,15 @@ namespace MyGL
 
 			// Vectors
 			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_VECTORS]);
-			glBufferData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+			glBufferData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::vec4), nullptr, GL_STATIC_DRAW);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_VECTORS, ubos[BINDING_VECTORS], 0, 1 * sizeof(glm::vec4));
 
+			// Scalars
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[BINDING_SCALARS]);
+			glBufferData(GL_UNIFORM_BUFFER, 1 * sizeof(float), nullptr, GL_STATIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			glBindBufferRange(GL_UNIFORM_BUFFER, BINDING_SCALARS, ubos[BINDING_SCALARS], 0, 1 * sizeof(float));
 		}
 
 		void SetMatrix(GLuint binding, int matrixIndex, const glm::mat4& mat)
@@ -108,9 +114,20 @@ namespace MyGL
 
 		void SetVector(GLuint binding, int vectorIndex, const glm::vec4& vector)
 		{
+
 			glBindBuffer(GL_UNIFORM_BUFFER, ubos[binding]);
 			glBufferSubData(GL_UNIFORM_BUFFER, vectorIndex * sizeof(glm::vec4), sizeof(glm::vec4), &vector);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		}
+
+		void SetScalar(GLuint binding, int scalarIndex, float v)
+		{
+
+			glBindBuffer(GL_UNIFORM_BUFFER, ubos[binding]);
+			glBufferSubData(GL_UNIFORM_BUFFER, scalarIndex * sizeof(float), sizeof(float), &v);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 		}
 
 		void Deinitialize()
@@ -136,6 +153,12 @@ namespace MyGL
 			uboIndex = glGetUniformBlockIndex(shaderId, "Vectors");
 			if (uboIndex != GL_INVALID_INDEX) {
 				glUniformBlockBinding(shaderId, uboIndex, BINDING_VECTORS);
+			}
+
+			// Scalars
+			uboIndex = glGetUniformBlockIndex(shaderId, "Scalars");
+			if (uboIndex != GL_INVALID_INDEX) {
+				glUniformBlockBinding(shaderId, uboIndex, BINDING_SCALARS);
 			}
 		}
 	}

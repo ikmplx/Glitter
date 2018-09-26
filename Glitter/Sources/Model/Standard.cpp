@@ -5,30 +5,36 @@
 #include "Material.h"
 #include "Res/Texture.h"
 #include "Res/Shader.h"
-#include "Utils.h"
 
 namespace MyGL
 {
+	Material::Material(TexturePtr diffuse)
+		: diffuse(diffuse)
+	{
+	}
 	Material::Material() = default;
+
 	Material::~Material() = default;
 
-	StandardMaterial::StandardMaterial()
-		: StandardMaterial(nullptr)
+	void Material::SetTexture(TexturePtr texture, TextureUsage textureUsage)
 	{
+		switch (textureUsage) {
+		case TextureUsage::Diffuse:
+			diffuse = texture;
+			break;
+
+		case TextureUsage::Normal:
+			normal = texture;
+			break;
+
+		case TextureUsage::Specular:
+			specular = texture;
+			break;
+		}
 	}
 
-	StandardMaterial::StandardMaterial(TexturePtr diffuse)
-		: diffuse(diffuse)
-		, shader(ResourceManager::Instance()->GetShader("SurfaceStandard"))
+	void Material::Bind(const ShaderPtr & shader)
 	{
-	}
-
-	StandardMaterial::~StandardMaterial() = default;
-
-	void StandardMaterial::Bind(const glm::mat4& modelTransform)
-	{
-		shader->Bind();
-		shader->SetMatrix("model", modelTransform);
 		int iSampler = 0;
 		if (diffuse) {
 			glActiveTexture(GL_TEXTURE0 + iSampler);
@@ -66,39 +72,5 @@ namespace MyGL
 		shader->SetFloat("specularBase", specularBase);
 
 		glActiveTexture(GL_TEXTURE0);
-	}
-
-	void StandardMaterial::SetTexture(TexturePtr texture, TextureUsage textureUsage)
-	{
-		switch (textureUsage) {
-		case TextureUsage::Diffuse:
-			diffuse = texture;
-			break;
-
-		case TextureUsage::Normal:
-			normal = texture;
-			break;
-
-		case TextureUsage::Specular:
-			specular = texture;
-			break;
-
-		default:
-			MyAssert(false);
-			break;
-		}
-	}
-
-	VertexColorMaterial::VertexColorMaterial()
-		: shader(ResourceManager::Instance()->GetShader("SurfaceVertexColor"))
-	{
-	}
-
-	VertexColorMaterial::~VertexColorMaterial() = default;
-
-	void VertexColorMaterial::Bind(const glm::mat4& modelTransform)
-	{
-		shader->Bind();
-		shader->SetMatrix("model", modelTransform);
 	}
 }

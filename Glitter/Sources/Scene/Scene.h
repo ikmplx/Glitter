@@ -21,7 +21,7 @@ namespace MyGL
 		void RemoveComponent(EntityPtr entity, ComponentPtr component);
 
 		void Update(float dt);
-		void Draw(ShaderPtr shader);
+		void Draw();
 
 		void AddSystem(SystemPtr system);
 

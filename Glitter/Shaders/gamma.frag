@@ -4,7 +4,8 @@ in vec2 vUv;
 out vec4 FragColor;
 
 uniform sampler2D texture1;
-uniform float gamma;
+
+@include ScalarsUbo
 
 void main()
 {

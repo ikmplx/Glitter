@@ -62,8 +62,11 @@ namespace MyGL
 
 		auto floorPlaneMesh = Primitives::CreatePlane(50.f, 50.f, 0.1f);
 		_floorEntity->SetMesh(floorPlaneMesh);
-		_floorEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Wood")));
-		_floorEntity->GetMaterial()->specularBase = 0.3f;
+
+		auto material = std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Wood"));
+		material->specularBase = 0.3f;
+
+		_floorEntity->SetMaterial(material);
 
 		btBoxShape* floorShape = new btBoxShape(btVector3(25.f, 0.1f, 25.f));
 		ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(floorShape, 0.f);
@@ -89,12 +92,12 @@ namespace MyGL
 		{
 			ModelLoader loader;
 			loader.SetTransform(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1, 0, 0)));
+			loader.SpecularBase(0.5f);
 			_towerPrefab = loader.Load("Models/vox/chr_sword.ply");
-
-			_towerPrefab->Traverse([](EntityPtr entity) {
-				if (entity->GetMesh()) {
-					entity->GetMaterial()->specularBase = 0.5f;
-				}
+			_towerPrefab->Traverse([](EntityPtr& entity) {
+				if (entity->GetMaterial()) {
+					entity->SetMaterial(std::make_shared<VertexColorMaterial>());
+				}	
 			});
 
 			_testShape = PhysicsSystem::CreateTriangleShape(_towerPrefab);
@@ -161,7 +164,7 @@ namespace MyGL
 
 			auto boxMesh = Primitives::CreateCube();
 			boxEntity->SetMesh(boxMesh);
-			boxEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
+			boxEntity->SetMaterial(std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Awesome")));
 
 			ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
 			_scene->AddComponent(boxEntity, physicsComponent);
@@ -183,6 +186,8 @@ namespace MyGL
 		glm::mat4 view = GetCamera().GetViewMatrix();
 		glm::mat4 proj = GetProjMatrix();
 
+		ImGui::SliderFloat("Gamma", &_gamma, 1.f, 2.4f);
+
 		{
 			glm::mat4 combined = proj * view;
 			glm::mat4 combinedNoDir = proj * glm::mat4(glm::mat3(view));
@@ -196,17 +201,14 @@ namespace MyGL
 			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 2, glm::inverse(combinedNoDir));
 
 			MyGL::UboManager::SetVector(MyGL::UboManager::BINDING_VECTORS, 0, glm::vec4(GetCamera().GetPosition(), 0.f));
-		}
 
-		ImGui::SliderFloat("Gamma", &_gamma, 1.f, 2.4f);
+			MyGL::UboManager::SetScalar(MyGL::UboManager::BINDING_SCALARS, 0, _gamma);
+		}
 
 		// Pass 1
 		_deferredRenderer->BeginPass1();
 
-		auto shader = MyGL::ResourceManager::Instance()->GetShader("Pass1");
-		shader->Bind();
-		shader->SetFloat("gamma", _gamma);
-		_scene->Draw(shader);
+		_scene->Draw();
 
 		_deferredRenderer->EndPass1();
 
@@ -279,6 +281,7 @@ namespace MyGL
 			glBlitFramebuffer(0, 0, _vpWidth, _vpHeight, 0, 0, _vpWidth, _vpHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
+
 	}
 
 	void TestState::MouseDown(int button, float x, float y)
@@ -288,7 +291,7 @@ namespace MyGL
 
 		auto boxMesh = Primitives::CreateCube();
 		boxEntity->SetMesh(boxMesh);
-		boxEntity->SetMaterial(std::make_shared<Material>(ResourceManager::Instance()->GetTexture("Awesome")));
+		boxEntity->SetMaterial(std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Awesome")));
 
 		auto physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
 		_scene->AddComponent(boxEntity, physicsComponent);

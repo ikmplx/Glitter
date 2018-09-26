@@ -7,8 +7,6 @@ in VS_OUT {
 	vec2 uv;
 } vsIn;
 
-out vec4 FragColor;
-
 uniform bool hasDiffuse1;
 uniform sampler2D textureDiffuse1;
 
@@ -16,7 +14,8 @@ uniform bool hasSpecular1;
 uniform sampler2D textureSpecular1;
 
 uniform float specularBase;
-uniform float gamma;
+
+@include ScalarsUbo
 
 layout (location = 0) out vec4 gAlbedoSpecular;
 layout (location = 1) out vec3 gNormal;

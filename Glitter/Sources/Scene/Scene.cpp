@@ -64,10 +64,10 @@ namespace MyGL
 		Complete();
 	}
 
-	void Scene::Draw(ShaderPtr shader)
+	void Scene::Draw()
 	{
-		_rootEntity->Traverse([&shader](EntityPtr entity) {
-			entity->Draw(shader);
+		_rootEntity->Traverse([](EntityPtr entity) {
+			entity->Draw();
 		});
 	}
 

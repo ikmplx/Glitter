@@ -42,6 +42,9 @@ namespace MyGL
 	private:
 		EntityPtr ProcessNode(aiNode* node, const aiScene* scene)
 		{
+			// TODO: sub node transformation not supported
+			MyAssert(node->mTransformation.IsIdentity());
+
 			EntityPtr nodeEntity = std::make_shared<Entity>();
 
 			for (unsigned iMesh = 0; iMesh < node->mNumMeshes; iMesh++) {
@@ -63,7 +66,6 @@ namespace MyGL
 			for (unsigned iNode = 0; iNode < node->mNumChildren; iNode++) {
 				aiNode* childNode = node->mChildren[iNode];
 				EntityPtr subNodeEntity = ProcessNode(childNode, scene);
-
 				nodeEntity->AddChild(subNodeEntity);
 			}
 
@@ -73,7 +75,8 @@ namespace MyGL
 		{
 			std::vector<Mesh::Vertex> vertices;
 			std::vector<unsigned> indices;
-			MaterialPtr myMaterial = std::make_shared<Material>();
+			std::shared_ptr<StandardMaterial> myMaterial = std::make_shared<StandardMaterial>();
+			myMaterial->specularBase = specularBase;
 
 			auto ProcessVec3 = [](const aiVector3D& vector) {
 				return glm::vec3(vector.x, vector.y, vector.z);
@@ -143,7 +146,7 @@ namespace MyGL
 
 			return std::make_tuple(myMesh, myMaterial);
 		}
-		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, MaterialPtr outMaterial) {
+		void LoadMaterialTextures(aiMaterial* material, aiTextureType textureType, TextureUsage textureUsage, std::shared_ptr<StandardMaterial> outMaterial) {
 			unsigned nTextures = material->GetTextureCount(textureType);
 			aiString path;
 
@@ -163,6 +166,7 @@ namespace MyGL
 		std::vector<MeshPtr> meshes;
 		std::string directory;
 		EntityPtr entity;
+		float specularBase = 1.f;
 
 		glm::mat4 transform = glm::mat4(1.f);
 		bool hasTransform = false;
@@ -191,5 +195,10 @@ namespace MyGL
 	{
 		d->transform = transform;
 		d->hasTransform = true;
+	}
+
+	void ModelLoader::SpecularBase(float specularBase)
+	{
+		d->specularBase = specularBase;
 	}
 }
