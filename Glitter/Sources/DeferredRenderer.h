@@ -12,6 +12,8 @@ namespace MyGL
 		DeferredRenderer(int width, int height);
 		~DeferredRenderer();
 
+		void DrawDebug();
+
 		void BeginPass1();
 		void EndPass1();
 
@@ -32,6 +34,8 @@ namespace MyGL
 		AttachmentPtr _gDepth;
 
 		FramebufferPtr _framebufferPass1;
+
+		GLuint _emptyVao;
 	};
 
 

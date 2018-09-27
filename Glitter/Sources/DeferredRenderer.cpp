@@ -6,6 +6,7 @@
 
 #include "Framebuffer.h"
 #include "Res/Shader.h"
+#include "Res/Texture.h"
 
 namespace MyGL
 {
@@ -22,10 +23,38 @@ namespace MyGL
 		_framebufferPass1->AttachColor(_gAlbedoSpecular);
 		_framebufferPass1->AttachColor(_gNormal);
 		_framebufferPass1->AttachDepth(_gDepth);
+
+		glGenVertexArrays(1, &_emptyVao);
 	}
 
 	DeferredRenderer::~DeferredRenderer()
 	{
+		glDeleteVertexArrays(1, &_emptyVao);
+	}
+
+	void DeferredRenderer::DrawDebug()
+	{
+		ShaderPtr shader = ResourceManager::Instance()->GetShader("vpquad");
+
+		shader->Bind();
+		shader->SetFloat("quadScale", 2/3.f);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindVertexArray(_emptyVao);
+
+		auto DrawDebugAttachment = [this, &shader](const AttachmentPtr& att, int slot) {
+			att->Bind();
+
+			shader->SetFloat2("quadShift", 1/3.f, -1.f + 2/3.f * slot);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		};
+
+		DrawDebugAttachment(_gAlbedoSpecular, 0);
+		DrawDebugAttachment(_gNormal, 1);
+		DrawDebugAttachment(_gDepth, 2);
+
+		glBindVertexArray(0);
+
 	}
 
 	void DeferredRenderer::BeginPass1()

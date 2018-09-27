@@ -29,7 +29,7 @@ namespace MyGL
 		void CreatePhysicObjects();
 
 		void DrawSkybox();
-		void DrawFullscreen();
+		void DrawFullscreen(ShaderPtr& shader);
 		glm::vec3 Gamma(const glm::vec3& color);
 
 		glm::mat4 GetProjMatrix() const;
@@ -37,6 +37,7 @@ namespace MyGL
 
 	private:
 		float _gamma = 2.2f;
+		bool _debugGBuffer = false;
 
 		EntityPtr _floorEntity;
 		std::vector<EntityPtr> _boxes;

@@ -230,7 +230,7 @@ namespace MyGL
 		ambientShader->SetVec3("ambientLight.color", Gamma(glm::vec3(0.15f)));
 
 		_deferredRenderer->BindColorAttachments(ambientShader);
-		DrawFullscreen();
+		DrawFullscreen(ambientShader);
 
 		// Directional
 		ShaderPtr dirShader = ResourceManager::Instance()->GetShader("Pass2Directional");
@@ -249,7 +249,7 @@ namespace MyGL
 		dirShader->SetInt("enableBlinn", enableBlinn);
 
 		_deferredRenderer->BindColorAttachments(dirShader);
-		DrawFullscreen();
+		DrawFullscreen(dirShader);
 
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
@@ -273,7 +273,7 @@ namespace MyGL
 			_colorPass2->Bind();
 			gammaShader->SetInt("texture1", 0);
 
-			DrawFullscreen();
+			DrawFullscreen(gammaShader);
 		}
 		else {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -282,6 +282,13 @@ namespace MyGL
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
+		ImGui::Checkbox("Debug g-buffer", &_debugGBuffer);
+		if (_debugGBuffer) {
+			glDisable(GL_DEPTH_TEST);
+			glDisable(GL_BLEND);
+
+			_deferredRenderer->DrawDebug();
+		}
 	}
 
 	void TestState::MouseDown(int button, float x, float y)
@@ -344,8 +351,11 @@ namespace MyGL
 		glDepthMask(GL_TRUE);
 	}
 
-	void TestState::DrawFullscreen()
+	void TestState::DrawFullscreen(ShaderPtr& shader)
 	{
+		shader->SetFloat("quadScale", 2.f);
+		shader->SetFloat2("quadShift", -1.f, -1.f);
+
 		glBindVertexArray(_emptyVao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
