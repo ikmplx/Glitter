@@ -19,6 +19,7 @@
 #include "Scene/Component.h"
 
 #include "Utils.h"
+#include "StateManager.h"
 
 namespace MyGL
 {
@@ -214,9 +215,6 @@ namespace MyGL
 
 		// Pass 2
 		_framebufferPass2->BeginRender();
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
 
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -251,9 +249,6 @@ namespace MyGL
 		_deferredRenderer->BindColorAttachments(dirShader);
 		DrawFullscreen(dirShader);
 
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-
 		// Forward
 		DrawSkybox();
 
@@ -261,9 +256,6 @@ namespace MyGL
 
 		if (_gamma > 1.f) {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_BLEND);
 
 			ShaderPtr gammaShader = ResourceManager::Instance()->GetShader("Gamma");
 			gammaShader->Bind();
@@ -284,8 +276,7 @@ namespace MyGL
 
 		ImGui::Checkbox("Debug g-buffer", &_debugGBuffer);
 		if (_debugGBuffer) {
-			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_BLEND);
+			StateManager::Instance()->SetState(StateType::ScreenQuad);
 
 			_deferredRenderer->DrawDebug();
 		}
@@ -328,8 +319,7 @@ namespace MyGL
 		MyGL::CubemapPtr skyboxTexture = MyGL::ResourceManager::Instance()->GetCubemap("Skybox");
 		MyGL::ShaderPtr shader = MyGL::ResourceManager::Instance()->GetShader("Skybox");
 
-		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_LEQUAL);
+		StateManager::Instance()->SetState(StateType::Skybox);
 
 		glActiveTexture(GL_TEXTURE0);
 		skyboxTexture->Bind();
@@ -346,13 +336,12 @@ namespace MyGL
 		glBindVertexArray(_emptyVao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-
-		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);
 	}
 
 	void TestState::DrawFullscreen(ShaderPtr& shader)
 	{
+		StateManager::Instance()->SetState(StateType::ScreenQuad);
+
 		shader->SetFloat("quadScale", 2.f);
 		shader->SetFloat2("quadShift", -1.f, -1.f);
 

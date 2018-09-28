@@ -13,7 +13,12 @@
 #include "imgui.h"
 
 // Bullet
+#pragma warning( push )
+#pragma warning( disable : 5033)
+#pragma warning( disable : 4706 )
+#pragma warning( disable : 4305 )
 #include <btBulletDynamicsCommon.h>
+#pragma warning( pop )
 
 // Standard Headers
 #include <cstdio>
@@ -31,3 +36,5 @@
 #include <memory>
 #include <bitset>
 #include <algorithm>
+#include <optional>
+#include <array>

@@ -7,6 +7,7 @@
 #include "Framebuffer.h"
 #include "Res/Shader.h"
 #include "Res/Texture.h"
+#include "StateManager.h"
 
 namespace MyGL
 {
@@ -61,9 +62,7 @@ namespace MyGL
 	{
 		_framebufferPass1->BeginRender();
 
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
+		StateManager::Instance()->SetState(StateType::Perspective);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

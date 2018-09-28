@@ -158,6 +158,7 @@ int main(int argc, char** argv, char **envp)
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	// glfwWindowHint(GLFW_SAMPLES, 4);
 
+	
 	auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
 
 	// Check for Valid Context
@@ -200,7 +201,6 @@ int main(int argc, char** argv, char **envp)
 	sCurrentState->SetViewportSize(mWidth, mHeight);
 	sCurrentState->Init();
 
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
 	ImGui_ImplGlfwGL3_Init(mWindow, false);
