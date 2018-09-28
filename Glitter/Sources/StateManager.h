@@ -11,13 +11,15 @@ namespace MyGL
 		std::optional<GLenum> depthFunc;
 
 		std::optional<bool> blend;
+		std::optional<std::pair<GLenum, GLenum>> blendFunc;
 	};
 
 	enum class StateType
 	{
 		Empty,
-		Perspective,
-		ScreenQuad,
+		Perspective, // 3d draw with depth test, without blend
+		OpaqueSprite, // Draw opaque rects on screen
+		LightPass,
 		Skybox,
 
 		CountStateTypes

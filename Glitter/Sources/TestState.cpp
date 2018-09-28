@@ -216,9 +216,6 @@ namespace MyGL
 		// Pass 2
 		_framebufferPass2->BeginRender();
 
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
-
 		glClearColor(0.f, 0.f, 0.f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -228,25 +225,25 @@ namespace MyGL
 		ambientShader->SetVec3("ambientLight.color", Gamma(glm::vec3(0.15f)));
 
 		_deferredRenderer->BindColorAttachments(ambientShader);
+
+		StateManager::Instance()->SetState(StateType::LightPass);
 		DrawFullscreen(ambientShader);
 
 		// Directional
 		ShaderPtr dirShader = ResourceManager::Instance()->GetShader("Pass2Directional");
 		dirShader->Bind();
 
-		glm::vec3 lightDir = _lightDir;
-		// glm::quat lightRotation = glm::angleAxis(_lightRotation, glm::vec3(0.f, 1.f, 0.f));
-		// lightDir = lightRotation * lightDir;
-
 		static bool enableBlinn = true;
 		ImGui::Checkbox("Blinn", &enableBlinn);
 
 		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.7f, 0.7f, 0.7f)));
-		dirShader->SetVec3("dirLight.direction", lightDir);
+		dirShader->SetVec3("dirLight.direction", _lightDir);
 		dirShader->SetFloat("dirLight.ambient", 0.f);
 		dirShader->SetInt("enableBlinn", enableBlinn);
 
 		_deferredRenderer->BindColorAttachments(dirShader);
+
+		StateManager::Instance()->SetState(StateType::LightPass);
 		DrawFullscreen(dirShader);
 
 		// Forward
@@ -265,6 +262,7 @@ namespace MyGL
 			_colorPass2->Bind();
 			gammaShader->SetInt("texture1", 0);
 
+			StateManager::Instance()->SetState(StateType::OpaqueSprite);
 			DrawFullscreen(gammaShader);
 		}
 		else {
@@ -276,7 +274,7 @@ namespace MyGL
 
 		ImGui::Checkbox("Debug g-buffer", &_debugGBuffer);
 		if (_debugGBuffer) {
-			StateManager::Instance()->SetState(StateType::ScreenQuad);
+			StateManager::Instance()->SetState(StateType::OpaqueSprite);
 
 			_deferredRenderer->DrawDebug();
 		}
@@ -340,8 +338,6 @@ namespace MyGL
 
 	void TestState::DrawFullscreen(ShaderPtr& shader)
 	{
-		StateManager::Instance()->SetState(StateType::ScreenQuad);
-
 		shader->SetFloat("quadScale", 2.f);
 		shader->SetFloat2("quadShift", -1.f, -1.f);
 

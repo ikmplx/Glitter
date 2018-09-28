@@ -34,10 +34,16 @@ namespace MyGL
 			state.blend = false;
 		});
 
-		AddPreset(StateType::ScreenQuad, [](State& state) {
+		AddPreset(StateType::OpaqueSprite, [](State& state) {
 			state.depthTest = false;
 			// state.depthWrite = false; // don't used, when depth test disabled
 			state.blend = false;
+		});
+
+		AddPreset(StateType::LightPass, [](State& state) {
+			state.depthTest = false;
+			state.blend = true;
+			state.blendFunc = std::make_pair(GL_ONE, GL_ONE);
 		});
 
 		AddPreset(StateType::Skybox, [](State& state) {
@@ -46,7 +52,6 @@ namespace MyGL
 			state.depthWrite = false;
 			state.blend = false;
 		});
-
 	}
 
 	void StateManager::SetState(const State& state)
@@ -59,12 +64,17 @@ namespace MyGL
 			glDepthMask(depthWrite);
 		});
 
+
+		TryChangeValue(state.depthFunc, _activeState.depthFunc, [](GLenum depthFunc) {
+			glDepthFunc(depthFunc);
+		});
+
 		TryChangeValue(state.blend, _activeState.blend, [](bool blend) {
 			GlEnable(GL_BLEND, blend);
 		});
 
-		TryChangeValue(state.depthFunc, _activeState.depthFunc, [](GLenum depthFunc) {
-			glDepthFunc(depthFunc);
+		TryChangeValue(state.blendFunc, _activeState.blendFunc, [](const auto& pair) {
+			glBlendFunc(pair.first, pair.second);
 		});
 	}
 
