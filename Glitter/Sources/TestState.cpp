@@ -64,8 +64,9 @@ namespace MyGL
 		auto floorPlaneMesh = Primitives::CreatePlane(50.f, 50.f, 0.1f);
 		_floorEntity->SetMesh(floorPlaneMesh);
 
-		auto material = std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Wood"));
+		auto material = std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Brickwall"));
 		material->specularBase = 0.3f;
+		material->normal = ResourceManager::Instance()->GetTexture("BrickwallNormal");
 
 		_floorEntity->SetMaterial(material);
 

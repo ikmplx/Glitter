@@ -2,9 +2,10 @@
 
 in VS_OUT {
 	vec3 color;
-	vec3 normal;
 	vec3 pos;
 	vec2 uv;
+
+	mat3 tbn;
 } vsIn;
 
 @include ScalarsUbo
@@ -20,5 +21,5 @@ void main()
 	float spec = 0.5;
 	
 	gAlbedoSpecular = vec4(vertexColor, spec);
-	gNormal = vsIn.normal;
+	gNormal = normalize(vsIn.tbn * vec3(0.0, 0.0, 1.0));
 } 

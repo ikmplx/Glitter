@@ -69,6 +69,9 @@ namespace MyGL
 		res->AddTexture("Awesome", "awesomeface.png");
 		res->AddTexture("Wood", "wood.png");
 
+		res->AddTexture("Brickwall", "brickwall.jpg");
+		res->AddTexture("BrickwallNormal", "brickwall_normal.jpg");
+
 		res->AddCubemap("Skybox", "skybox/", ".jpg", {"right", "left", "top", "bottom", "front", "back"});
 	}
 

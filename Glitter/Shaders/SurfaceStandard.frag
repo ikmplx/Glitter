@@ -2,9 +2,10 @@
 
 in VS_OUT {
 	vec3 color;
-	vec3 normal;
 	vec3 pos;
 	vec2 uv;
+
+	mat3 tbn;
 } vsIn;
 
 uniform bool hasDiffuse1;
@@ -12,6 +13,9 @@ uniform sampler2D textureDiffuse1;
 
 uniform bool hasSpecular1;
 uniform sampler2D textureSpecular1;
+
+uniform bool hasNormal1;
+uniform sampler2D textureNormal1;
 
 uniform float specularBase;
 
@@ -35,7 +39,13 @@ void main()
 		vec3 specVec = texture(textureSpecular1, vsIn.uv).rgb;
 		spec *= dot(specVec, vec3(1.0));
 	}
+
+	if (hasNormal1) {
+		vec3 normal = normalize(texture(textureNormal1, vsIn.uv).rgb * 2.0 - 1.0);
+		gNormal = normalize(vsIn.tbn * normal);
+	} else {
+		gNormal = normalize(vsIn.tbn * vec3(0.0, 0.0, 1.0));
+	}
 	
 	gAlbedoSpecular = vec4(texColor, spec);
-	gNormal = vsIn.normal;
 } 

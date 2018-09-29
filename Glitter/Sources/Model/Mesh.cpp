@@ -161,17 +161,17 @@ namespace MyGL
 	{
 		std::vector<Mesh::Vertex> vertices;
 
-		auto AddVertex = [&vertices](float x, float y, float z, float u, float v, float nx, float ny, float nz) {
-			vertices.push_back({ glm::vec3(x, y, z), glm::vec3(nx, ny, nz), glm::vec2(u, v), glm::vec3(1.0), glm::vec3(), glm::vec3() });
+		auto AddVertex = [&vertices](float x, float y, float z, float u, float v) {
+			vertices.push_back({ glm::vec3(x, y, z), glm::vec3(0, 1, 0), glm::vec2(u, v), glm::vec3(1.0), glm::vec3(0, 0, -1), glm::vec3(1, 0, 0) });
 		};
 
 		float halfWidth = width * 0.5f;
 		float halfHeight = height * 0.5f;
 
-		AddVertex(-halfWidth, 0.f, -halfHeight, 0.f, 0.f, 0.f, 1.f, 0.f);
-		AddVertex(-halfWidth, 0.f, halfHeight, 0.f, height * textureScale, 0.f, 1.f, 0.f);
-		AddVertex(halfWidth,  0.f,  halfHeight, width * textureScale, height * textureScale, 0.f, 1.f, 0.f);
-		AddVertex(halfWidth,  0.f, -halfHeight, width * textureScale, 0.f, 0.f, 1.f, 0.f);
+		AddVertex(-halfWidth, 0.f, -halfHeight, 0.f, 0.f);
+		AddVertex(-halfWidth, 0.f, halfHeight, 0.f, height * textureScale);
+		AddVertex(halfWidth,  0.f,  halfHeight, width * textureScale, height * textureScale);
+		AddVertex(halfWidth,  0.f, -halfHeight, width * textureScale, 0.f);
 
 		std::vector<unsigned> indices{
 			0, 1, 2,
