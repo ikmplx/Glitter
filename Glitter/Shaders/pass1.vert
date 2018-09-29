@@ -25,15 +25,18 @@ void main()
 
 	gl_Position = combined * model * pos;
 	vsOut.pos = (model * pos).xyz;
+	
+	mat3 normalMatrix = mat3(transpose(inverse(model)));
+
+	vec3 T = normalize(normalMatrix * aBitangent);
+	vec3 B = normalize(normalMatrix * aTangent);
+	vec3 N = normalize(normalMatrix * aNormal);
 
 	/*
-	mat3 normalMatrix = mat3(transpose(inverse(model)));
-	vsOut.normal = normalMatrix * aNormal;
-	*/
-
 	vec3 T = normalize(vec3(model * vec4(aBitangent, 0.0)));
 	vec3 B = normalize(vec3(model * vec4(aTangent, 0.0)));
 	vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+	*/
 
 	vsOut.tbn = mat3(T, B, N);
 
