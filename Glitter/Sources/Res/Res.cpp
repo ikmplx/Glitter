@@ -57,6 +57,7 @@ namespace MyGL
 
 		res->AddShader("SurfaceStandard", "pass1", "SurfaceStandard");
 		res->AddShader("SurfaceVertexColor", "pass1", "SurfaceVertexColor");
+		res->AddShader("SurfaceCubemap", "pass1", "SurfaceCubemap");
 		res->AddShader("Skybox", "skybox", "skybox");
 		res->AddVPQuadShader("vpquad", "vpquad");
 

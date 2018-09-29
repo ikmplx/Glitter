@@ -40,7 +40,6 @@ namespace MyGL
 		bool _debugGBuffer = false;
 
 		EntityPtr _floorEntity;
-		std::vector<EntityPtr> _boxes;
 
 		EntityPtr _nanosuitPrefab;
 		EntityPtr _towerPrefab;
@@ -66,5 +65,8 @@ namespace MyGL
 
 		std::unique_ptr<btBoxShape> _boxShape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
 		TriangleShapeHolderPtr _testShape;
+
+		MeshPtr _sphereMesh;
+		std::unique_ptr<btSphereShape> _sphereShape = std::make_unique<btSphereShape>(0.6f);
 	};
 }

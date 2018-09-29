@@ -91,6 +91,8 @@ namespace MyGL
 
 		//_nanosuitPrefab = ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
 
+		_sphereMesh = Primitives::CreateSphere(0.6f, 3);
+
 		{
 			ModelLoader loader;
 			loader.SetTransform(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1, 0, 0)));
@@ -283,15 +285,14 @@ namespace MyGL
 
 	void TestState::MouseDown(int button, float x, float y)
 	{
-		auto boxEntity = _scene->CreateEntity();
-		_scene->AddComponent(boxEntity, std::make_shared<TestComponent>());
+		auto sphereEntity = _scene->CreateEntity();
+		_scene->AddComponent(sphereEntity, std::make_shared<TestComponent>());
 
-		auto boxMesh = Primitives::CreateCube();
-		boxEntity->SetMesh(boxMesh);
-		boxEntity->SetMaterial(std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Awesome")));
+		sphereEntity->SetMesh(_sphereMesh);
+		sphereEntity->SetMaterial(std::make_shared<CubemapMaterial>(ResourceManager::Instance()->GetCubemap("Skybox")));
 
-		auto physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
-		_scene->AddComponent(boxEntity, physicsComponent);
+		auto physicsComponent = std::make_shared<PhysicsComponent>(_sphereShape.get(), 1.f);
+		_scene->AddComponent(sphereEntity, physicsComponent);
 
 		glm::vec3 dir;
 
@@ -301,7 +302,7 @@ namespace MyGL
 			dir = _camera->GetDirection();
 		}
 
-		boxEntity->position = _camera->GetPosition() + dir * 2.f;
+		sphereEntity->position = _camera->GetPosition() + dir * 2.f;
 		physicsComponent->pendingImpulse = dir * 70.f;
 	}
 

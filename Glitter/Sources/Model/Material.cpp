@@ -101,4 +101,22 @@ namespace MyGL
 		shader->Bind();
 		shader->SetMatrix("model", modelTransform);
 	}
+
+
+	CubemapMaterial::CubemapMaterial(const CubemapPtr& cubemap)
+		: shader(ResourceManager::Instance()->GetShader("SurfaceCubemap"))
+		, cubemap(cubemap)
+	{
+	}
+
+	CubemapMaterial::~CubemapMaterial() = default;
+
+	void CubemapMaterial::Bind(const glm::mat4& modelTransform)
+	{
+		shader->Bind();
+		shader->SetMatrix("model", modelTransform);
+		glActiveTexture(GL_TEXTURE0);
+		cubemap->Bind();
+		shader->SetInt("texture1", 0);
+	}
 }

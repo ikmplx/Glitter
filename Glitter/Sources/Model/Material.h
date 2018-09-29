@@ -44,6 +44,18 @@ namespace MyGL
 		void Bind(const glm::mat4& modelTransform) override;
 
 		ShaderPtr shader;
-		float specularBase = 1.0;
 	};
+
+	class CubemapMaterial : public Material
+	{
+	public:
+		CubemapMaterial(const CubemapPtr& cubemap);
+		~CubemapMaterial();
+
+		void Bind(const glm::mat4& modelTransform) override;
+
+		ShaderPtr shader;
+		CubemapPtr cubemap;
+	};
+
 }

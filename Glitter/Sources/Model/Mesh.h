@@ -42,5 +42,6 @@ namespace MyGL
 	namespace Primitives {
 		MeshPtr CreateCube();
 		MeshPtr CreatePlane(float width, float height, float textureScale);
+		MeshPtr CreateSphere(float radius, int subdivisions);
 	}
 }
