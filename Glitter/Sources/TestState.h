@@ -6,6 +6,8 @@
 
 namespace MyGL
 {
+	class LightSystem;
+
 	class TestState : public GameState
 	{
 	public:
@@ -36,6 +38,7 @@ namespace MyGL
 		glm::vec3 CameraRay(float x, float y) const;
 
 	private:
+		bool _enableBlinn = true;
 		float _gamma = 2.2f;
 		bool _debugGBuffer = false;
 
@@ -68,5 +71,8 @@ namespace MyGL
 
 		MeshPtr _sphereMesh;
 		std::unique_ptr<btSphereShape> _sphereShape = std::make_unique<btSphereShape>(0.6f);
+
+		std::shared_ptr<LightSystem> _lightSystem;
+		MeshPtr _lightSphereMesh;
 	};
 }

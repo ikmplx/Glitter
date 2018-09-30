@@ -20,6 +20,7 @@
 
 #include "Utils.h"
 #include "StateManager.h"
+#include "Light.h"
 
 namespace MyGL
 {
@@ -92,6 +93,7 @@ namespace MyGL
 		//_nanosuitPrefab = ModelLoader::LoadModel("Models/nanosuit/nanosuit.obj");
 
 		_sphereMesh = Primitives::CreateSphere(0.6f, 3);
+		_lightSphereMesh = Primitives::CreateSphere(1.f, 2);
 
 		{
 			ModelLoader loader;
@@ -110,6 +112,7 @@ namespace MyGL
 		_scene = std::make_shared<MyGL::Scene>();
 		_scene->AddSystem(std::make_shared<TestSystem>());
 		_scene->AddSystem(std::make_shared<PhysicsSystem>());
+		_scene->AddSystem(_lightSystem = std::make_shared<LightSystem>());
 
 		_centerEntity = _scene->CreateEntity();
 
@@ -175,6 +178,9 @@ namespace MyGL
 
 			boxEntity->position = glm::vec3(_dropCount % 6 - 3, 80.f, _dropCount % 6 - 3);
 			boxEntity->rotation = glm::angleAxis(1.1f + _dropCount, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
+
+			auto lightComponent = std::make_shared<LightComponent>(glm::vec3(1.f, 1.f, 0.6f), 1.f, 0.7f, 1.8f);
+			_scene->AddComponent(boxEntity, lightComponent);
 		}
 	}
 
@@ -191,6 +197,7 @@ namespace MyGL
 		glm::mat4 proj = GetProjMatrix();
 
 		ImGui::SliderFloat("Gamma", &_gamma, 1.f, 2.4f);
+		ImGui::Checkbox("Blinn", &_enableBlinn);
 
 		{
 			glm::mat4 combined = proj * view;
@@ -225,7 +232,7 @@ namespace MyGL
 		// Ambient
 		ShaderPtr ambientShader = ResourceManager::Instance()->GetShader("Pass2Ambient");
 		ambientShader->Bind();
-		ambientShader->SetVec3("ambientLight.color", Gamma(glm::vec3(0.15f)));
+		ambientShader->SetVec3("ambientLight.color", Gamma(glm::vec3(0.05f)));
 
 		_deferredRenderer->BindColorAttachments(ambientShader);
 
@@ -236,18 +243,44 @@ namespace MyGL
 		ShaderPtr dirShader = ResourceManager::Instance()->GetShader("Pass2Directional");
 		dirShader->Bind();
 
-		static bool enableBlinn = true;
-		ImGui::Checkbox("Blinn", &enableBlinn);
-
-		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.7f, 0.7f, 0.7f)));
+		dirShader->SetVec3("dirLight.color", Gamma(glm::vec3(0.15f, 0.15f, 0.15f)));
 		dirShader->SetVec3("dirLight.direction", _lightDir);
 		dirShader->SetFloat("dirLight.ambient", 0.f);
-		dirShader->SetInt("enableBlinn", enableBlinn);
+		dirShader->SetInt("enableBlinn", _enableBlinn);
 
 		_deferredRenderer->BindColorAttachments(dirShader);
 
 		StateManager::Instance()->SetState(StateType::LightPass);
 		DrawFullscreen(dirShader);
+
+		// Point light
+		ShaderPtr pointShader = ResourceManager::Instance()->GetShader("Pass2Point");
+		pointShader->Bind();
+		pointShader->SetInt("enableBlinn", _enableBlinn);
+		_deferredRenderer->BindColorAttachments(pointShader);
+		glCullFace(GL_FRONT);
+
+		_lightSystem->ForEachLight([this, &pointShader](Light& light, const glm::vec3& pos) {
+			pointShader->SetVec3("pointLight.color", light.color);
+			pointShader->SetFloat("pointLight.linear", light.linear);
+			pointShader->SetFloat("pointLight.quadratic", light.quadratic);
+			pointShader->SetFloat("pointLight.constant", light.constant);
+			pointShader->SetVec3("pointLight.position", pos);
+
+			const float minBrightness = 1.f;
+			const float brightness = std::max(std::max(light.color.r, light.color.g), light.color.b);
+			const float sphereRadius = (-light.linear + glm::sqrt(light.linear * light.linear - 4.f * light.quadratic * (light.constant - brightness * 256.f / minBrightness))) / (2.f * light.quadratic);
+
+			glm::mat4 model = glm::mat4(1.f);
+
+			model = glm::translate(model, pos);
+			model = glm::scale(model, glm::vec3(sphereRadius));
+
+			pointShader->SetMatrix("model", model);
+
+			_lightSphereMesh->Draw(pointShader);
+		});
+		glCullFace(GL_BACK);
 
 		// Forward
 		DrawSkybox();
@@ -289,10 +322,14 @@ namespace MyGL
 		_scene->AddComponent(sphereEntity, std::make_shared<TestComponent>());
 
 		sphereEntity->SetMesh(_sphereMesh);
-		sphereEntity->SetMaterial(std::make_shared<CubemapMaterial>(ResourceManager::Instance()->GetCubemap("Skybox")));
+		//sphereEntity->SetMaterial(std::make_shared<CubemapMaterial>(ResourceManager::Instance()->GetCubemap("Skybox")));
+		sphereEntity->SetMaterial(std::make_shared<VertexColorMaterial>());
 
 		auto physicsComponent = std::make_shared<PhysicsComponent>(_sphereShape.get(), 1.f);
 		_scene->AddComponent(sphereEntity, physicsComponent);
+
+		auto lightComponent = std::make_shared<LightComponent>(glm::vec3(1.f, 1.f, 1.f), 1.f, 0.7f, 1.8f);
+		_scene->AddComponent(sphereEntity, lightComponent);
 
 		glm::vec3 dir;
 
