@@ -94,6 +94,7 @@ namespace MyGL
 
 		_sphereMesh = Primitives::CreateSphere(0.6f, 3);
 		_lightSphereMesh = Primitives::CreateSphere(1.f, 2);
+		_boxMesh = Primitives::CreateCube();
 
 		{
 			ModelLoader loader;
@@ -166,11 +167,11 @@ namespace MyGL
 		while (_dropTimer <= 0 && _dropCount-- > 0) {
 			_dropTimer += 0.02f;
 
+			// Base box entity with physics and deferred rendered shape
 			auto boxEntity = _scene->CreateEntity();
 			_scene->AddComponent(boxEntity, std::make_shared<TestComponent>());
 
-			auto boxMesh = Primitives::CreateCube();
-			boxEntity->SetMesh(boxMesh);
+			boxEntity->SetMesh(_boxMesh);
 			boxEntity->SetMaterial(std::make_shared<StandardMaterial>(ResourceManager::Instance()->GetTexture("Awesome")));
 
 			ComponentPtr physicsComponent = std::make_shared<PhysicsComponent>(_boxShape.get(), 1.f);
@@ -184,46 +185,15 @@ namespace MyGL
 		}
 	}
 
-	void TestState::Draw()
+	void TestState::Pass1()
 	{
-		float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
-		float constantProgress = (float)fmod(glfwGetTime(), 100.0) * 4.f;
-
-		// _centerEntity->position = glm::vec3(0.f, 0.f, -constantProgress * 10.f);
-		// _centerEntity->rotation = glm::angleAxis(constantProgress / 2.f, glm::vec3(0, 1, 0));
-		// _centerEntity->InvalidateTransform();
-
-		glm::mat4 view = GetCamera().GetViewMatrix();
-		glm::mat4 proj = GetProjMatrix();
-
-		ImGui::SliderFloat("Gamma", &_gamma, 1.f, 2.4f);
-		ImGui::Checkbox("Blinn", &_enableBlinn);
-
-		{
-			glm::mat4 combined = proj * view;
-			glm::mat4 combinedNoDir = proj * glm::mat4(glm::mat3(view));
-
-			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 0, proj);
-			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 1, view);
-			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 2, combined);
-
-			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 0, combinedNoDir);
-			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 1, glm::inverse(combined));
-			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 2, glm::inverse(combinedNoDir));
-
-			MyGL::UboManager::SetVector(MyGL::UboManager::BINDING_VECTORS, 0, glm::vec4(GetCamera().GetPosition(), 0.f));
-
-			MyGL::UboManager::SetScalar(MyGL::UboManager::BINDING_SCALARS, 0, _gamma);
-		}
-
-		// Pass 1
 		_deferredRenderer->BeginPass1();
-
 		_scene->Draw();
-
 		_deferredRenderer->EndPass1();
+	}
 
-		// Pass 2
+	void TestState::Pass2()
+	{
 		_framebufferPass2->BeginRender();
 
 		glClearColor(0.f, 0.f, 0.f, 0.0f);
@@ -267,9 +237,11 @@ namespace MyGL
 			pointShader->SetFloat("pointLight.constant", light.constant);
 			pointShader->SetVec3("pointLight.position", pos);
 
-			const float minBrightness = 1.f;
+			const float minBrightness = 3.f;
 			const float brightness = std::max(std::max(light.color.r, light.color.g), light.color.b);
-			const float sphereRadius = (-light.linear + glm::sqrt(light.linear * light.linear - 4.f * light.quadratic * (light.constant - brightness * 256.f / minBrightness))) / (2.f * light.quadratic);
+			const float sphereRadius = 1.11f * (-light.linear + glm::sqrt(light.linear * light.linear - 4.f * light.quadratic * (light.constant - brightness * 256.f / minBrightness))) / (2.f * light.quadratic);
+
+			pointShader->SetFloat("pointLight.radius", sphereRadius);
 
 			glm::mat4 model = glm::mat4(1.f);
 
@@ -281,12 +253,46 @@ namespace MyGL
 			_lightSphereMesh->Draw(pointShader);
 		});
 		glCullFace(GL_BACK);
+	}
+
+	void TestState::Draw()
+	{
+		float pulseProgress = 0.75f + 0.25f * (float)sin(glfwGetTime());
+		float constantProgress = (float)fmod(glfwGetTime(), 100.0) * 4.f;
+
+		glm::mat4 view = GetCamera().GetViewMatrix();
+		glm::mat4 proj = GetProjMatrix();
+
+		ImGui::SliderFloat("Gamma", &_gamma, 1.f, 2.4f);
+		ImGui::Checkbox("Blinn", &_enableBlinn);
+
+		{
+			glm::mat4 combined = proj * view;
+			glm::mat4 combinedNoDir = proj * glm::mat4(glm::mat3(view));
+
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 0, proj);
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 1, view);
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES, 2, combined);
+
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 0, combinedNoDir);
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 1, glm::inverse(combined));
+			MyGL::UboManager::SetMatrix(MyGL::UboManager::BINDING_MATRICES_EXT, 2, glm::inverse(combinedNoDir));
+
+			MyGL::UboManager::SetVector(MyGL::UboManager::BINDING_VECTORS, 0, glm::vec4(GetCamera().GetPosition(), 0.f));
+
+			MyGL::UboManager::SetScalar(MyGL::UboManager::BINDING_SCALARS, 0, _gamma);
+		}
+
+		Pass1();
+		Pass2();
 
 		// Forward
 		DrawSkybox();
 
 		_framebufferPass2->EndRender();
 
+
+		// Apply gamma correction
 		if (_gamma > 1.f) {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

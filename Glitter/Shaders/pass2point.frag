@@ -19,6 +19,7 @@ struct PointLight
 	float constant;
 	float linear;
 	float quadratic;
+	float radius;
 };
 uniform PointLight pointLight;
 
@@ -42,6 +43,8 @@ void main()
 
 	float lightDist = length(pointLight.position - position);
 	float attenuation = 1.0 / (pointLight.constant + pointLight.linear * lightDist + pointLight.quadratic * lightDist * lightDist);
+
+	attenuation *= (1.0 - smoothstep(0.9 * pointLight.radius, pointLight.radius, lightDist));
 
 	// Diffuse
 	float diffuseIntensity = max(0.0, dot(normal, lightDir)) * attenuation;

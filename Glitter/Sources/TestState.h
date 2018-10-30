@@ -27,6 +27,10 @@ namespace MyGL
 	private:
 		void UpdateGame(float dt);
 
+		// Passes
+		void Pass1();
+		void Pass2();
+
 		void CreateFramebuffer();
 		void CreatePhysicObjects();
 
@@ -68,6 +72,8 @@ namespace MyGL
 
 		std::unique_ptr<btBoxShape> _boxShape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
 		TriangleShapeHolderPtr _testShape;
+
+		MeshPtr _boxMesh;
 
 		MeshPtr _sphereMesh;
 		std::unique_ptr<btSphereShape> _sphereShape = std::make_unique<btSphereShape>(0.6f);
