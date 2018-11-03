@@ -39,10 +39,12 @@ file(GLOB VENDORS_SOURCES Glitter/Vendor/imgui/imgui*.cpp
 file(GLOB_RECURSE PROJECT_SOURCES Glitter/Sources/*.cpp )
 file(GLOB_RECURSE PROJECT_HEADERS Glitter/Sources/*.h)
 
-file(GLOB PROJECT_SHADERS Glitter/Shaders/*.comp
+file(GLOB_RECURSE PROJECT_SHADERS Glitter/Shaders/*.comp
                           Glitter/Shaders/*.frag
                           Glitter/Shaders/*.geom
-                          Glitter/Shaders/*.vert)
+                          Glitter/Shaders/*.vert
+						  Glitter/Shaders/*.glsl
+						  )
 
 file(GLOB PROJECT_TEXTURES Glitter/Textures/*.jpg
                            Glitter/Textures/*.png)
@@ -65,24 +67,31 @@ if (MSVC)
 
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-	# Begin copypaste from SO
-	foreach(FILE ${PROJECT_SOURCES} ${PROJECT_HEADERS}) 
-		# Get the directory of the source file
-		get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+	function(MYGL_GROUP_SOURCES)
+		cmake_parse_arguments(MY1 "" NAME SRCS ${ARGN})
 
-		# Remove common directory prefix to make the group
-		string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" GROUP "${PARENT_DIR}")
+		# Begin copypaste from SO
+		foreach(FILE ${MY1_SRCS}) 
+			# Get the directory of the source file
+			get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
 
-		# Make sure we are using windows slashes
-		string(REPLACE "/" "\\" GROUP "${GROUP}")
+			# Remove common directory prefix to make the group
+			string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/Glitter" "" GROUP "${PARENT_DIR}")
 
-		source_group("Sources${GROUP}" FILES "${FILE}")
-	endforeach()
-	# End copypaste
+			# Make sure we are using windows slashes
+			string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+			source_group("${GROUP}" FILES "${FILE}")
+		endforeach()
+		# End copypaste
+	endfunction(MYGL_GROUP_SOURCES)
+
+	MYGL_GROUP_SOURCES(NAME "Sources" SRCS ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+	MYGL_GROUP_SOURCES(NAME "Shaders" SRCS ${PROJECT_SHADERS})
 
 endif()
 
-source_group("Shaders" FILES ${PROJECT_SHADERS})
+#source_group("Shaders" FILES ${PROJECT_SHADERS})
 source_group("Textures" FILES ${PROJECT_TEXTURES})
 #source_group("Sources" FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 source_group("Vendors" FILES ${VENDORS_SOURCES})

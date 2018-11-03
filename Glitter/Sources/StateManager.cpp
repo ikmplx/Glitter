@@ -92,6 +92,4 @@ namespace MyGL
 			glDisable(key);
 		}
 	}
-
-
 }
