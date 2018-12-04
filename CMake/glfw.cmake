@@ -9,6 +9,6 @@ ExternalProject_Add(glfw
 )
 
 include_directories(${GLFW_INCLUDE_DIR})
-target_link_libraries(Glitter ${GLFW_LIB_DIR}/glfw3${CMAKE_STATIC_LIBRARY_SUFFIX})
+target_link_libraries(Glitter ${GLFW_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}glfw3${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 add_dependencies(Glitter glfw)

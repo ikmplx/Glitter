@@ -213,7 +213,7 @@ int main(int argc, char** argv, char **envp)
 		double lastFps;
 	} fpsCounter = { 0, lastTime, 0 };
 
-	double frameTimeLimit = 1.0 / 110.0;
+	double frameTimeLimit = 1.0 / 60.0;
 
 	double nextFrameTime = lastTime + frameTimeLimit;
 	double frameLimiterActive = 0.0;

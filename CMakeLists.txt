@@ -15,9 +15,13 @@ if(MSVC)
 
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /SAFESEH:NO")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++17 -pthread")
+    
+    find_package(Threads REQUIRED)
+    find_package(X11 REQUIRED)
+    
     if(NOT WIN32)
-        set(GLAD_LIBRARIES dl)
+        set(GLAD_LIBRARIES dl "${X11_X11_LIB}" "${CMAKE_THREAD_LIBS_INIT}" )
     endif()
 endif()
 

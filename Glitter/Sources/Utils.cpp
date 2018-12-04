@@ -62,5 +62,11 @@ void MyGL::Utils::Assert(bool assertion)
 		__debugbreak();
 	}
 }
-
+#else
+void MyGL::Utils::Assert(bool assertion)
+{
+	if (!assertion) {
+		abort();
+	}
+}
 #endif

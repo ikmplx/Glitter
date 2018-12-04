@@ -101,7 +101,7 @@ namespace MyGL
 			loader.SetTransform(glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1, 0, 0)));
 			loader.SpecularBase(0.5f);
 			_towerPrefab = loader.Load("Models/vox/chr_sword.ply");
-			_towerPrefab->Traverse([](EntityPtr& entity) {
+			_towerPrefab->Traverse([](const EntityPtr& entity) {
 				if (entity->GetMaterial()) {
 					entity->SetMaterial(std::make_shared<VertexColorMaterial>());
 				}	
