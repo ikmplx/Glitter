@@ -5,6 +5,7 @@
 #include <typeindex>
 
 #include <Forward.h>
+#include "Utils.h"
 
 namespace MyGL
 {
@@ -14,8 +15,6 @@ namespace MyGL
 		virtual ~Component();
 
 		virtual int GetTypeId() const = 0;
-
-		static int sComponentTypeCounter;
 	};
 
 	template<typename T>
@@ -23,13 +22,12 @@ namespace MyGL
 	{
 		virtual int GetTypeId() const override
 		{
-			return GetTypeIdStatic();
+			return Utils::TypeId<T, Component>::GetId();
 		}
 
 		static int GetTypeIdStatic()
 		{
-			static int myType = sComponentTypeCounter++;
-			return myType;
+			return Utils::TypeId<T, Component>::GetId();
 		}
 	};
 }

@@ -32,6 +32,13 @@ namespace MyGL
 
 		void AddSystem(SystemPtr system);
 
+		template<typename T>
+		std::shared_ptr<T> GetComponent(EntityPtr entity)
+		{
+			static_assert(std::is_base_of<Component, T>::value);
+			return std::static_pointer_cast<T>(GetComponent(entity, Utils::TypeId<T, Component>::GetId()));
+		}
+
 	private:
 		void Complete();
 
@@ -49,6 +56,8 @@ namespace MyGL
 		void EntityRemoved(EntityPtr entity);
 		void ComponentRemoved(EntityPtr entity, ComponentPtr component);
 
+		ComponentPtr GetComponent(EntityPtr entity, int compId);
+
 	private:
 		EntityPtr _rootEntity;
 		
@@ -62,7 +71,7 @@ namespace MyGL
 
 		std::vector<SystemPtr> _systems;
 
-		// down - entities, right - components
+		// [components][entities]
 		Array2D<ComponentHolder> _table;
 		IdPool _entityIdPool;
 	};

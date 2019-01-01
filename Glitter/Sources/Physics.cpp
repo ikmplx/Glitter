@@ -7,6 +7,7 @@
 #include "Model/Mesh.h"
 #include "Utils.h"
 #include "Scene/Component.h"
+#include "Scene/Scene.h"
 
 namespace MyGL
 {
@@ -62,7 +63,8 @@ namespace MyGL
 	void PhysicsSystem::Update(ScenePtr scene, float dt)
 	{
 		for (auto& entity : GetEntities()) {
-			auto comp = entity->FindComponent<PhysicsComponent>();
+			auto comp = scene->GetComponent<PhysicsComponent>(entity);
+			MyAssert(comp != nullptr);
 
 			if (!comp->rigidBody) {
 				comp->motionState = std::make_unique<PhysicsMotionState>(entity);

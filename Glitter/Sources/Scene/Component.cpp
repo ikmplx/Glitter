@@ -6,8 +6,6 @@
 
 namespace MyGL
 {
-	int Component::sComponentTypeCounter = 0;
-
 	Component::Component()
 	{
 	}

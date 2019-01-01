@@ -32,13 +32,5 @@ namespace MyGL
 		LightSystem();
 
 		void Update(ScenePtr scene, float dt) override;
-
-		template <typename Fun>
-		void ForEachLight(Fun fun)
-		{
-			for (auto& entity : GetEntities()) {
-				fun(entity->FindComponent<LightComponent>()->light, entity->GetGlobalPosition());
-			}
-		}
 	};
 }

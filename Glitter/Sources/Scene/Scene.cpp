@@ -67,6 +67,7 @@ namespace MyGL
 
 	void Scene::Draw()
 	{
+		ImGui::Text("%d", _table.SizeY());
 		_rootEntity->Traverse([](EntityPtr entity) {
 			entity->Draw();
 		});
@@ -223,5 +224,12 @@ namespace MyGL
 			auto& c = _table.SafeRef(component->GetTypeId(), entity->GetId());
 			c.component = nullptr;
 		}
+	}
+
+	ComponentPtr Scene::GetComponent(EntityPtr entity, int compId)
+	{
+		auto comp = _table.SafeRef(compId, entity->GetId()).component;
+		MyAssert(comp == nullptr || comp->GetTypeId() == compId);
+		return comp;
 	}
 }

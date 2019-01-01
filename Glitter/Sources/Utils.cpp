@@ -6,6 +6,8 @@
 #include "Utils.h"
 #include <ctime>
 
+template MyGL::Utils::TypeIdCounter<MyGL::Component>;
+
 namespace MyGL
 {
 	static std::mt19937 sGen;

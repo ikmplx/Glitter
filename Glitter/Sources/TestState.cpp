@@ -183,8 +183,8 @@ namespace MyGL
 			boxEntity->position = glm::vec3(_dropCount % 6 - 3, 80.f, _dropCount % 6 - 3);
 			boxEntity->rotation = glm::angleAxis(1.1f + _dropCount, glm::normalize(glm::vec3(1.f, 0.9f, 0.8f)));
 
-			auto lightComponent = std::make_shared<LightComponent>(glm::vec3(1.f, 1.f, 0.6f), 1.f, 0.7f, 1.8f);
-			_scene->AddComponent(boxEntity, lightComponent);
+			//auto lightComponent = std::make_shared<LightComponent>(glm::vec3(1.f, 1.f, 0.6f), 1.f, 0.7f, 1.8f);
+			//_scene->AddComponent(boxEntity, lightComponent);
 		}
 	}
 
@@ -233,7 +233,10 @@ namespace MyGL
 		_deferredRenderer->BindColorAttachments(pointShader);
 		glCullFace(GL_FRONT);
 
-		_lightSystem->ForEachLight([this, &pointShader](Light& light, const glm::vec3& pos) {
+		for (auto& entity : _lightSystem->GetEntities()) {
+			auto pos = entity->GetGlobalPosition();
+			auto& light = _scene->GetComponent<LightComponent>(entity)->light;
+			
 			pointShader->SetVec3("pointLight.color", light.color);
 			pointShader->SetFloat("pointLight.linear", light.linear);
 			pointShader->SetFloat("pointLight.quadratic", light.quadratic);
@@ -254,7 +257,7 @@ namespace MyGL
 			pointShader->SetMatrix("model", model);
 
 			_lightSphereMesh->Draw(pointShader);
-		});
+		}
 		glCullFace(GL_BACK);
 	}
 

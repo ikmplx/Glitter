@@ -4,8 +4,31 @@
 
 namespace MyGL
 {
+	struct Component;
+
 	namespace Utils
 	{
+		template<typename T2>
+		struct TypeIdCounter
+		{
+			static int counter;
+		};
+
+		template<typename T2>
+		int TypeIdCounter<T2>::counter;
+
+		extern template TypeIdCounter<MyGL::Component>;
+
+		template<typename T, typename T2>
+		struct TypeId
+		{
+			static int GetId()
+			{
+				static int counter = TypeIdCounter<T2>::counter++;
+				return counter;
+			}
+		};
+
 		inline constexpr size_t HashCombine()
 		{
 			return 0;

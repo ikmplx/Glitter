@@ -10,13 +10,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#pragma warning(push, 0) 
 #include "imgui.h"
+#pragma warning(pop)
 
 // Bullet
 #pragma warning( push )
 #pragma warning( disable : 5033)
 #pragma warning( disable : 4706 )
 #pragma warning( disable : 4305 )
+#pragma warning( disable : 26451 )
 #include <btBulletDynamicsCommon.h>
 #pragma warning( pop )
 
