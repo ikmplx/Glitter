@@ -3,9 +3,16 @@
 #pragma once
 
 #include "Forward.h"
+#include "Array2D.h"
+#include "IdPool.h"
 
 namespace MyGL
 {
+	struct ComponentHolder
+	{
+		ComponentPtr component;
+	};
+
 	class Scene : public std::enable_shared_from_this<Scene>
 	{
 	public:
@@ -25,8 +32,6 @@ namespace MyGL
 
 		void AddSystem(SystemPtr system);
 
-		int EnsureComponentTypeId(ComponentType componentType);
-
 	private:
 		void Complete();
 
@@ -44,8 +49,6 @@ namespace MyGL
 		void EntityRemoved(EntityPtr entity);
 		void ComponentRemoved(EntityPtr entity, ComponentPtr component);
 
-		int EnsureComponentTypeId(ComponentPtr component);
-
 	private:
 		EntityPtr _rootEntity;
 		
@@ -59,7 +62,8 @@ namespace MyGL
 
 		std::vector<SystemPtr> _systems;
 
-		std::unordered_map<ComponentType, int> _componentTypeIds;
-		int _componentTypeIdCounter = 0;
+		// down - entities, right - components
+		Array2D<ComponentHolder> _table;
+		IdPool _entityIdPool;
 	};
 }

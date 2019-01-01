@@ -35,6 +35,12 @@ namespace MyGL
 		void SetMaterial(MaterialPtr material);
 		MaterialPtr GetMaterial();
 
+		void SetId(int id);
+		int GetId() const;
+
+		void SetName(std::string name);
+		std::string GetName() const;
+
 		void Draw();
 
 		void InvalidateTransform();
@@ -57,6 +63,9 @@ namespace MyGL
 		glm::mat4 externalTransform = glm::mat4(1.f);
 
 	private:
+		int _id = -1;
+		std::string _name;
+
 		EntityWeakPtr _parent;
 		std::vector<EntityPtr> _children;
 

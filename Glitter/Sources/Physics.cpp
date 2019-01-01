@@ -41,7 +41,7 @@ namespace MyGL
 	};
 
 	PhysicsSystem::PhysicsSystem()
-		: System(typeid(PhysicsComponent))
+		: System(MyGL::TypedComponent<PhysicsComponent>::GetTypeIdStatic())
 	{
 		_collisionConfiguration = new btDefaultCollisionConfiguration();
 		_dispatcher = new btCollisionDispatcher(_collisionConfiguration);

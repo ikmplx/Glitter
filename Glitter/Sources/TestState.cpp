@@ -24,7 +24,7 @@
 
 namespace MyGL
 {
-	class TestComponent : public Component
+	class TestComponent : public TypedComponent<TestComponent>
 	{
 	};
 
@@ -32,7 +32,7 @@ namespace MyGL
 	{
 	public:
 		TestSystem()
-			: System(typeid(TestComponent))
+			: System(TypedComponent<TestComponent>::GetTypeIdStatic())
 		{
 		}
 
@@ -61,6 +61,7 @@ namespace MyGL
 	{
 		// Plane
 		_floorEntity = _scene->CreateEntity(_floorEntity);
+		_floorEntity->SetName("Floor");
 
 		auto floorPlaneMesh = Primitives::CreatePlane(50.f, 50.f, 0.1f);
 		_floorEntity->SetMesh(floorPlaneMesh);
@@ -78,6 +79,8 @@ namespace MyGL
 
 		// Tower
 		_towerEntity = _towerPrefab->Clone();
+		_towerEntity->SetName("Tower");
+
 		_towerEntity->position += glm::vec3(0, 0, 0);
 
 		_scene->AddEntity(_towerEntity, _centerEntity);

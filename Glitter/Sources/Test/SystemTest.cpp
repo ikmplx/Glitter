@@ -11,11 +11,11 @@
 #include "Scene/System.h"
 #include "Scene/Component.h"
 
-struct TestComponent1 : MyGL::Component
+struct TestComponent1 : MyGL::TypedComponent<TestComponent1>
 {
 };
 
-struct TestComponent2 : MyGL::Component
+struct TestComponent2 : MyGL::TypedComponent<TestComponent2>
 {
 };
 
@@ -23,7 +23,7 @@ class TestSystem1 : public MyGL::System
 {
 public:
 	TestSystem1()
-		: MyGL::System(typeid(TestComponent1))
+		: MyGL::System(MyGL::TypedComponent<TestComponent1>::GetTypeIdStatic())
 	{
 	}
 
@@ -39,7 +39,8 @@ class TestSystem12 : public MyGL::System
 {
 public:
 	TestSystem12()
-		: MyGL::System({typeid(TestComponent1), typeid(TestComponent2)})
+		: MyGL::System({MyGL::TypedComponent<TestComponent1>::GetTypeIdStatic(),
+			MyGL::TypedComponent<TestComponent2>::GetTypeIdStatic()})
 	{
 	}
 

@@ -15,6 +15,7 @@ namespace MyGL
 	Scene::Scene()
 		: _rootEntity(new Entity())
 	{
+		_rootEntity->SetId(_entityIdPool.Alloc());
 	}
 
 	Scene::~Scene() = default;
@@ -144,7 +145,6 @@ namespace MyGL
 		}
 
 		_removingComponents.clear();
-
 	}
 
 	void Scene::CompleteChangingComponentsEntities()
@@ -166,6 +166,9 @@ namespace MyGL
 
 	void Scene::EntityAdded(EntityPtr entity)
 	{
+		MyAssert(entity->GetId() < 0);
+		entity->SetId(_entityIdPool.Alloc());
+
 		for (auto& component : entity->_components) {
 			_addingComponents.emplace_back(entity, component);
 		}
@@ -173,49 +176,52 @@ namespace MyGL
 
 	void Scene::ComponentAdded(EntityPtr entity, ComponentPtr component)
 	{
-		int componentTypeId = EnsureComponentTypeId(component);
+		int componentTypeId = component->GetTypeId();
+		
+		// Old
 		if (!entity->_componentTypeSet.test(componentTypeId)) {
 			entity->_componentTypeSet.set(componentTypeId);
 			entity->_components.push_back(component);
 
 			_changingComponentsEntities.push_back(entity);
 		}
+
+		// New
+		auto& c = _table.SafeRef(componentTypeId, entity->GetId());
+		MyAssert(!c.component);
+		c.component = component;
 	}
 
 	void Scene::EntityRemoved(EntityPtr entity)
 	{
 		for (auto& component : entity->_components) {
 			_removingComponents.emplace_back(entity, component);
+
+			// New
+			auto& c = _table.SafeRef(component->GetTypeId(), entity->GetId());
+			MyAssert(c.component != nullptr);
+			c.component = nullptr;
 		}
+
+		_entityIdPool.Dealloc(entity->GetId());
+		entity->SetId(-1);
 	}
 
 	void Scene::ComponentRemoved(EntityPtr entity, ComponentPtr component)
 	{
-		int componentTypeId = EnsureComponentTypeId(component);
+		// Old
+		int componentTypeId = component->GetTypeId();
 		if (entity->_componentTypeSet.test(componentTypeId)) {
-			entity->_componentTypeSet.reset(EnsureComponentTypeId(component));
+			entity->_componentTypeSet.reset(componentTypeId);
 			entity->_components.erase(std::find(entity->_components.begin(), entity->_components.end(), component), entity->_components.end());
 
 			_changingComponentsEntities.push_back(entity);
 		}
-	}
 
-	int Scene::EnsureComponentTypeId(ComponentPtr component)
-	{
-		if (component->componentTypeId < 0) {
-			component->componentTypeId = EnsureComponentTypeId(typeid(*component));
+		// New
+		if (entity->GetId() >= 0) {
+			auto& c = _table.SafeRef(component->GetTypeId(), entity->GetId());
+			c.component = nullptr;
 		}
-
-		return component->componentTypeId;
-	}
-
-	int Scene::EnsureComponentTypeId(ComponentType componentType)
-	{
-		auto emplaceResult = _componentTypeIds.emplace(componentType, _componentTypeIdCounter);
-		if (emplaceResult.second) {
-			_componentTypeIdCounter++;
-		}
-
-		return emplaceResult.first->second;
 	}
 }

@@ -51,7 +51,7 @@ namespace MyGL
 	struct Component;
 	using ComponentPtr = std::shared_ptr<Component>;
 	using ComponentWeakPtr = std::weak_ptr<Component>;
-	using ComponentType = std::type_index;
+	using ComponentType = int;
 	using ComponentTypeSet = std::bitset<32>;
 	
 	class System;

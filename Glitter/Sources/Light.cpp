@@ -12,7 +12,7 @@ namespace MyGL
 	}
 
 	LightSystem::LightSystem()
-		: System(typeid(LightComponent))
+		: System(TypedComponent<LightComponent>::GetTypeIdStatic())
 	{
 	}
 

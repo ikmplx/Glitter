@@ -99,6 +99,26 @@ namespace MyGL
 		return _material;
 	}
 
+	void Entity::SetId(int id)
+	{
+		_id = id;
+	}
+
+	int Entity::GetId() const
+	{
+		return _id;
+	}
+
+	void Entity::SetName(std::string name)
+	{
+		_name = std::move(name);
+	}
+
+	std::string Entity::GetName() const
+	{
+		return _name;
+	}
+
 	void Entity::Draw()
 	{
 		if (_mesh && _material) {

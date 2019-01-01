@@ -18,7 +18,7 @@ namespace MyGL
 		float quadratic;
 	};
 
-	class LightComponent : public Component
+	class LightComponent : public TypedComponent<LightComponent>
 	{
 	public:
 		LightComponent(const glm::vec3& color, float constant, float linear, float quadratic);

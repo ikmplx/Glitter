@@ -16,7 +16,7 @@ namespace MyGL
 	};
 	using TriangleShapeHolderPtr = std::shared_ptr<TriangleShapeHolder>;
 
-	class PhysicsComponent : public Component
+	class PhysicsComponent : public TypedComponent<PhysicsComponent>
 	{
 	public:
 		PhysicsComponent(btCollisionShape* collisionShape, float mass);

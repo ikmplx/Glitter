@@ -23,7 +23,6 @@ namespace MyGL
 		virtual void MouseDown(int button, float x, float y) override;
 		virtual void MouseUp(int button, float x, float y) override;
 
-
 	private:
 		void UpdateGame(float dt);
 

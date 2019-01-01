@@ -13,6 +13,23 @@ namespace MyGL
 		Component();
 		virtual ~Component();
 
-		int componentTypeId = -1;
+		virtual int GetTypeId() const = 0;
+
+		static int sComponentTypeCounter;
+	};
+
+	template<typename T>
+	struct TypedComponent : Component
+	{
+		virtual int GetTypeId() const override
+		{
+			return GetTypeIdStatic();
+		}
+
+		static int GetTypeIdStatic()
+		{
+			static int myType = sComponentTypeCounter++;
+			return myType;
+		}
 	};
 }

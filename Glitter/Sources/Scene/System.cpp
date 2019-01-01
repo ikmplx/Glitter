@@ -27,8 +27,8 @@ namespace MyGL
 
 	void System::AddedToScene(ScenePtr scene, int systemTypeId)
 	{
-		for (auto& componentType : _componentTypes) {
-			_componentTypeSet.set(scene->EnsureComponentTypeId(componentType));
+		for (auto componentType : _componentTypes) {
+			_componentTypeSet.set(componentType);
 		}
 
 		_systemTypeId = systemTypeId;
