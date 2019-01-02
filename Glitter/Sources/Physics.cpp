@@ -62,7 +62,7 @@ namespace MyGL
 
 	void PhysicsSystem::Update(ScenePtr scene, float dt)
 	{
-		for (auto& entity : GetEntities()) {
+		scene->ForEachEntity<PhysicsComponent>([this, scene](EntityPtr& entity) {
 			auto comp = scene->GetComponent<PhysicsComponent>(entity);
 			MyAssert(comp != nullptr);
 
@@ -76,28 +76,24 @@ namespace MyGL
 				comp->rigidBody  = std::make_unique<btRigidBody>(rbInfo);
 
 				_world->addRigidBody(comp->rigidBody.get());
-				_physicEntities[entity] = comp;
+				_components.push_back(comp);
 			}
 
 			glm::vec3& impulse = comp->pendingImpulse;
 			comp->rigidBody->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
 			impulse = glm::vec3(0.f, 0.f, 0.f);
-		}
+		});
+
+		_components.erase(std::remove_if(_components.begin(), _components.end(), [this](auto& comp) {
+			if (!comp->attached) {
+				_world->removeRigidBody(comp->rigidBody.get());
+				return true;
+			}
+
+			return false;
+		}), _components.end());
 
 		_world->stepSimulation(dt, 2);
-	}
-
-	void PhysicsSystem::BeforeEntityRemove(EntityPtr entity)
-	{
-		auto iter = _physicEntities.find(entity);
-		if (iter != _physicEntities.end()) {
-			auto& comp = iter->second;
-			_world->removeRigidBody(comp->rigidBody.get());
-			comp->rigidBody = nullptr;
-			comp->motionState = nullptr;
-
-			_physicEntities.erase(iter);
-		}
 	}
 
 	TriangleShapeHolderPtr PhysicsSystem::CreateTriangleShape(const EntityPtr& entity)

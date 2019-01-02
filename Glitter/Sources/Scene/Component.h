@@ -11,6 +11,8 @@ namespace MyGL
 {
 	struct Component
 	{
+		bool attached = false;
+
 		Component();
 		virtual ~Component();
 

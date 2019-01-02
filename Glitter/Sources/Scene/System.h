@@ -16,22 +16,13 @@ namespace MyGL
 
 		virtual void Update(ScenePtr scene, float dt) = 0;
 
-		virtual void BeforeEntityRemove(EntityPtr entity);
-
-
 		void AddedToScene(ScenePtr scene, int systemTypeId);
-
-		void EntityComponentsUpdated(EntityPtr entity);
-
-		bool IsProcessEntity(EntityPtr entity) const;
 
 		std::vector<EntityPtr>& GetEntities();
 
 	private:
 		std::vector<EntityPtr> _entities;
 		std::vector<ComponentType> _componentTypes;
-
-		ComponentTypeSet _componentTypeSet;
 
 		int _systemTypeId = -1;
 	};

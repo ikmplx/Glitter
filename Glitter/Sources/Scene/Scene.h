@@ -11,6 +11,10 @@ namespace MyGL
 	struct ComponentHolder
 	{
 		ComponentPtr component;
+
+		EntityWeakPtr entity;
+		int prev = -1;
+		int next = -1;
 	};
 
 	class Scene : public std::enable_shared_from_this<Scene>
@@ -39,6 +43,23 @@ namespace MyGL
 			return std::static_pointer_cast<T>(GetComponent(entity, Utils::TypeId<T, Component>::GetId()));
 		}
 
+		template<typename T, typename Fun>
+		void ForEachEntity(Fun fun)
+		{
+			auto compTypeId = Utils::TypeId<T, Component>::GetId();
+			int ci = GetComponentListHead(compTypeId);
+
+			while (ci != - 1) {
+				auto& cc = _table[compTypeId][ci];
+
+				EntityPtr entity = cc.entity.lock();
+				MyAssert(entity != nullptr);
+				fun(entity);
+
+				ci = cc.next;
+			}
+		}
+
 	private:
 		void Complete();
 
@@ -48,8 +69,6 @@ namespace MyGL
 		void CompleteRemovingEntities();
 		void CompleteRemovingComponents();
 
-		void CompleteChangingComponentsEntities();
-
 		void EntityAdded(EntityPtr entity);
 		void ComponentAdded(EntityPtr entity, ComponentPtr component);
 
@@ -57,6 +76,12 @@ namespace MyGL
 		void ComponentRemoved(EntityPtr entity, ComponentPtr component);
 
 		ComponentPtr GetComponent(EntityPtr entity, int compId);
+
+		int& GetComponentListHead(const ComponentPtr& component);
+		int& GetComponentListHead(int typeId);
+
+		void InsertComponentToList(ComponentHolder& componentHolder, int entityId);
+		void RemoveComponentFromList(ComponentHolder& componentHolder);
 
 	private:
 		EntityPtr _rootEntity;
@@ -67,12 +92,11 @@ namespace MyGL
 		std::vector<EntityPtr> _removingEntities;
 		std::vector<std::tuple<EntityPtr, ComponentPtr>> _removingComponents;
 
-		std::vector<EntityPtr> _changingComponentsEntities;
-
 		std::vector<SystemPtr> _systems;
 
 		// [components][entities]
 		Array2D<ComponentHolder> _table;
 		IdPool _entityIdPool;
+		std::vector<int> _componentLists;
 	};
 }

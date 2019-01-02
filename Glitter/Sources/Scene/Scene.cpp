@@ -7,8 +7,6 @@
 #include "Entity.h"
 #include "Component.h"
 #include "System.h"
-#include "Model/Mesh.h"
-#include "Res/Shader.h"
 
 namespace MyGL
 {
@@ -16,6 +14,8 @@ namespace MyGL
 		: _rootEntity(new Entity())
 	{
 		_rootEntity->SetId(_entityIdPool.Alloc());
+
+		// _table.SafeRef(1000, 1000);
 	}
 
 	Scene::~Scene() = default;
@@ -86,8 +86,6 @@ namespace MyGL
 
 		CompleteRemovingEntities();
 		CompleteRemovingComponents();
-
-		CompleteChangingComponentsEntities();
 	}
 
 	void Scene::CompleteAddingEntities()
@@ -148,27 +146,12 @@ namespace MyGL
 		_removingComponents.clear();
 	}
 
-	void Scene::CompleteChangingComponentsEntities()
-	{
-		std::set<Entity*> uniqueSet;
-
-		for (auto& c : _changingComponentsEntities) {
-			auto iter = uniqueSet.find(c.get());
-			if (iter == uniqueSet.end()) {
-				for (auto& system : _systems) {
-					system->EntityComponentsUpdated(c);
-					uniqueSet.insert(c.get());
-				}
-			}
-		}
-
-		_changingComponentsEntities.clear();
-	}
-
 	void Scene::EntityAdded(EntityPtr entity)
 	{
 		MyAssert(entity->GetId() < 0);
 		entity->SetId(_entityIdPool.Alloc());
+
+		_table.SafeRef(0, entity->GetId());
 
 		for (auto& component : entity->_components) {
 			_addingComponents.emplace_back(entity, component);
@@ -179,57 +162,98 @@ namespace MyGL
 	{
 		int componentTypeId = component->GetTypeId();
 		
-		// Old
-		if (!entity->_componentTypeSet.test(componentTypeId)) {
-			entity->_componentTypeSet.set(componentTypeId);
-			entity->_components.push_back(component);
-
-			_changingComponentsEntities.push_back(entity);
-		}
-
 		// New
 		auto& c = _table.SafeRef(componentTypeId, entity->GetId());
 		MyAssert(!c.component);
+		MyAssert(c.next == -1);
+		MyAssert(c.prev == -1);
 		c.component = component;
+		c.entity = entity;
+		c.component->attached = true;
+
+		InsertComponentToList(c, entity->GetId());
 	}
 
 	void Scene::EntityRemoved(EntityPtr entity)
 	{
-		for (auto& component : entity->_components) {
-			_removingComponents.emplace_back(entity, component);
-
-			// New
-			auto& c = _table.SafeRef(component->GetTypeId(), entity->GetId());
-			MyAssert(c.component != nullptr);
-			c.component = nullptr;
+		// Deleting all entity's components
+		for (int i = 0; i < _table.SizeX(); i++) {
+			auto& c = _table.SafeRef(i, entity->GetId());
+			if (c.component != nullptr) {
+				RemoveComponentFromList(c);
+				c.component->attached = false;
+				c.component = nullptr;
+			}
 		}
 
+		// Deleing entity
 		_entityIdPool.Dealloc(entity->GetId());
 		entity->SetId(-1);
 	}
 
 	void Scene::ComponentRemoved(EntityPtr entity, ComponentPtr component)
 	{
-		// Old
-		int componentTypeId = component->GetTypeId();
-		if (entity->_componentTypeSet.test(componentTypeId)) {
-			entity->_componentTypeSet.reset(componentTypeId);
-			entity->_components.erase(std::find(entity->_components.begin(), entity->_components.end(), component), entity->_components.end());
-
-			_changingComponentsEntities.push_back(entity);
-		}
-
-		// New
 		if (entity->GetId() >= 0) {
 			auto& c = _table.SafeRef(component->GetTypeId(), entity->GetId());
+			MyAssert(c.component != nullptr);
+
+			RemoveComponentFromList(c);
+			c.component->attached = false;
 			c.component = nullptr;
+			c.entity.reset();
 		}
 	}
 
 	ComponentPtr Scene::GetComponent(EntityPtr entity, int compId)
 	{
-		auto comp = _table.SafeRef(compId, entity->GetId()).component;
+		auto comp = _table[compId][entity->GetId()].component;
 		MyAssert(comp == nullptr || comp->GetTypeId() == compId);
 		return comp;
+	}
+
+	int& Scene::GetComponentListHead(const ComponentPtr& component)
+	{
+		return GetComponentListHead(component->GetTypeId());
+	}
+
+	int& Scene::GetComponentListHead(int typeId)
+	{
+		_componentLists.resize(std::max<size_t>(typeId + size_t(1), _componentLists.size()), -1);
+		return _componentLists[typeId];
+	}
+
+	void Scene::InsertComponentToList(ComponentHolder& componentHolder, int entityId)
+	{
+		auto compTypeId = componentHolder.component->GetTypeId();
+		auto& head = GetComponentListHead(compTypeId);
+
+		componentHolder.next = head;
+		componentHolder.prev = -1;
+		head = entityId;
+
+		if (componentHolder.next != -1) {
+			_table[compTypeId][componentHolder.next].prev = entityId;
+		}
+	}
+
+	void Scene::RemoveComponentFromList(ComponentHolder& componentHolder)
+	{
+		auto compTypeId = componentHolder.component->GetTypeId();
+
+		auto prev = componentHolder.prev;
+		auto next = componentHolder.next;
+
+		if (prev != -1) {
+			_table[compTypeId][prev].next = next;
+		} else {
+			auto& head = GetComponentListHead(compTypeId);
+			head = next;
+		}
+
+		if (next != -1) {
+			_table[compTypeId][next].prev = prev;
+		}
+
+		componentHolder.next = componentHolder.prev = -1;
 	}
 }

@@ -37,7 +37,6 @@ namespace MyGL
 		~PhysicsSystem();
 
 		void Update(ScenePtr scene, float dt) override;
-		void BeforeEntityRemove(EntityPtr entity) override;
 
 		static TriangleShapeHolderPtr CreateTriangleShape(const EntityPtr& entity);
 
@@ -48,6 +47,6 @@ namespace MyGL
 		btSequentialImpulseConstraintSolver* _solver = nullptr;
 		btDiscreteDynamicsWorld* _world = nullptr;
 
-		std::unordered_map<EntityPtr, std::shared_ptr<PhysicsComponent>> _physicEntities;
+		std::vector<std::shared_ptr<PhysicsComponent>> _components;
 	};
 }

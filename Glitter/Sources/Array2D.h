@@ -54,7 +54,7 @@ namespace MyGL
 
 		void ResizeMin(size_t sizeX, size_t sizeY, T def = T())
 		{
-			if (sizeX < _sizeX && sizeY < _sizeY) {
+			if (sizeX <= _sizeX && sizeY <= _sizeY) {
 				return;
 			}
 

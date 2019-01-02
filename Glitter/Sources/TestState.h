@@ -67,7 +67,7 @@ namespace MyGL
 		glm::vec3 _lightDir = glm::vec3(0.2f, -1.f, -1.f);
 
 		float _dropTimer = 0.1f;
-		int _dropCount = 100;
+		int _dropCount = 0;
 
 		std::unique_ptr<btBoxShape> _boxShape = std::make_unique<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
 		TriangleShapeHolderPtr _testShape;

@@ -21,40 +21,11 @@ namespace MyGL
 
 	System::~System() = default;
 
-	void System::BeforeEntityRemove(EntityPtr entity)
-	{
-	}
-
 	void System::AddedToScene(ScenePtr scene, int systemTypeId)
 	{
-		for (auto componentType : _componentTypes) {
-			_componentTypeSet.set(componentType);
-		}
-
 		_systemTypeId = systemTypeId;
 	}
 
-	void System::EntityComponentsUpdated(EntityPtr entity)
-	{
-		if (IsProcessEntity(entity)) {
-			if (!entity->_systemTypeSet.test(_systemTypeId)) {
-				entity->_systemTypeSet.set(_systemTypeId);
-				_entities.push_back(entity);
-			}
-		}
-		else {
-			if (entity->_systemTypeSet.test(_systemTypeId)) {
-				BeforeEntityRemove(entity);
-				entity->_systemTypeSet.reset(_systemTypeId);
-				_entities.erase(std::remove(_entities.begin(), _entities.end(), entity), _entities.end());
-			}
-		}
-	}
-
-	bool System::IsProcessEntity(EntityPtr entity) const
-	{
-		return (entity->_componentTypeSet & _componentTypeSet) == _componentTypeSet;
-	}
 	std::vector<EntityPtr>& System::GetEntities()
 	{
 		return _entities;
