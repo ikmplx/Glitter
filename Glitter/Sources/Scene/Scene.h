@@ -17,6 +17,83 @@ namespace MyGL
 		int next = -1;
 	};
 
+	class EntityRangeIterator
+	{
+	public:
+		using iterator_category = std::forward_iterator_tag;
+		using value_type = EntityPtr;
+		using difference_type = int;
+		using pointer = EntityPtr*;
+		using reference = EntityPtr;
+
+		EntityRangeIterator(Array2D<ComponentHolder>& table, int componentTypeId, int currentEntity)
+			: _table(table)
+			, _componentTypeId(componentTypeId)
+			, _currentEntity(currentEntity)
+		{
+		}
+
+		EntityRangeIterator& operator++()  // pre
+		{
+			auto& c = _table[_componentTypeId][_currentEntity];
+			_currentEntity = c.next;
+			return *this;
+		}
+
+		EntityRangeIterator operator++(int)  // post
+		{
+			auto ret = *this;
+			++(*this);
+			return ret;
+		}
+
+		bool operator==(EntityRangeIterator other) const
+		{
+			return _currentEntity == other._currentEntity;
+		}
+
+		bool operator!=(EntityRangeIterator other) const
+		{
+			return !(*this == other);
+		}
+
+		EntityPtr operator*() const
+		{
+			return _table[_componentTypeId][_currentEntity].entity.lock();
+		}
+
+	private:
+		Array2D<ComponentHolder>& _table;
+		int _componentTypeId;
+		int _currentEntity;
+	};
+
+	class EntityRange
+	{
+	public:
+		EntityRange(Array2D<ComponentHolder>& table, int componentTypeId, int beginning)
+			: _table(table)
+			, _componentTypeId(componentTypeId)
+			, _beginning(beginning)
+		{
+		}
+
+		EntityRangeIterator begin() const
+		{
+			return EntityRangeIterator(_table, _componentTypeId, _beginning);
+		}
+
+		EntityRangeIterator end() const
+		{
+			return EntityRangeIterator(_table, _componentTypeId, -1);
+		}
+
+	private:
+		Array2D<ComponentHolder>& _table;
+		int _componentTypeId;
+		int _beginning;
+	};
+
 	class Scene : public std::enable_shared_from_this<Scene>
 	{
 	public:
@@ -43,20 +120,18 @@ namespace MyGL
 			return std::static_pointer_cast<T>(GetComponent(entity, Utils::TypeId<T, Component>::GetId()));
 		}
 
+		template<typename T>
+		EntityRange ForEachEntity()
+		{
+			auto componentTypeId = Utils::TypeId<T, Component>::GetId();
+			return EntityRange(_table, componentTypeId, GetComponentListHead(componentTypeId));
+		}
+
 		template<typename T, typename Fun>
 		void ForEachEntity(Fun fun)
 		{
-			auto compTypeId = Utils::TypeId<T, Component>::GetId();
-			int ci = GetComponentListHead(compTypeId);
-
-			while (ci != - 1) {
-				auto& cc = _table[compTypeId][ci];
-
-				EntityPtr entity = cc.entity.lock();
-				MyAssert(entity != nullptr);
+			for (auto& entity : ForEachEntity<T>()) {
 				fun(entity);
-
-				ci = cc.next;
 			}
 		}
 

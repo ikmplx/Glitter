@@ -62,7 +62,7 @@ namespace MyGL
 
 	void PhysicsSystem::Update(ScenePtr scene, float dt)
 	{
-		scene->ForEachEntity<PhysicsComponent>([this, scene](EntityPtr& entity) {
+		for (auto& entity : scene->ForEachEntity<PhysicsComponent>()) {
 			auto comp = scene->GetComponent<PhysicsComponent>(entity);
 			MyAssert(comp != nullptr);
 
@@ -82,7 +82,7 @@ namespace MyGL
 			glm::vec3& impulse = comp->pendingImpulse;
 			comp->rigidBody->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
 			impulse = glm::vec3(0.f, 0.f, 0.f);
-		});
+		}
 
 		_components.erase(std::remove_if(_components.begin(), _components.end(), [this](auto& comp) {
 			if (!comp->attached) {

@@ -38,11 +38,11 @@ namespace MyGL
 
 		virtual void Update(ScenePtr scene, float dt) override
 		{
-			scene->ForEachEntity<TestComponent>([scene](EntityPtr& entity) {
+			for (auto& entity : scene->ForEachEntity<TestComponent>()) {
 				if (entity->GetGlobalPosition().y < -100) {
 					scene->RemoveEntity(entity);
 				}
-			});
+			}
 		}
 	};
 
@@ -230,7 +230,7 @@ namespace MyGL
 		_deferredRenderer->BindColorAttachments(pointShader);
 		glCullFace(GL_FRONT);
 
-		_scene->ForEachEntity<LightComponent>([this, &pointShader](EntityPtr& entity) {
+		for (auto& entity : _scene->ForEachEntity<LightComponent>()) {
 			auto pos = entity->GetGlobalPosition();
 			auto& light = _scene->GetComponent<LightComponent>(entity)->light;
 			
@@ -254,7 +254,7 @@ namespace MyGL
 			pointShader->SetMatrix("model", model);
 
 			_lightSphereMesh->Draw(pointShader);
-		});
+		}
 		glCullFace(GL_BACK);
 	}
 
