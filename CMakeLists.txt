@@ -26,16 +26,17 @@ else()
 endif()
 
 include_directories(Glitter/Sources/
-#                    Glitter/Vendor/assimp/include/
                     Glitter/Vendor/glad/
                     Glitter/Vendor/glm/
                     Glitter/Vendor/stb/
-                    
-#                    Glitter/Vendor/bullet/src/
-
 					Glitter/Vendor/imgui/
-					Glitter/Vendor/imgui_impl/
-					)
+					Glitter/Vendor/imgui_impl/)
+                    
+if (MSVS)
+    include_directories(Glitter/Sources/Pch)
+else()
+    include_directories(${CMAKE_BINARY_DIR}/pch)
+endif()
 
 file(GLOB VENDORS_SOURCES Glitter/Vendor/imgui/imgui*.cpp
                           Glitter/Vendor/imgui_impl/*.cpp)
@@ -66,7 +67,7 @@ if (MSVC)
     #set_source_files_properties(Glitter/Sources/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Ycstdafx.h /Fp\"${PrecompiledBinary}\""  OBJECT_OUTPUTS "${PrecompiledBinary}")
 
     set_source_files_properties(${PROJECT_SOURCES} PROPERTIES COMPILE_FLAGS "/Yu")
-    set_source_files_properties(Glitter/Sources/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yc")
+    set_source_files_properties(Glitter/Sources/Pch/stdafx.cpp PROPERTIES COMPILE_FLAGS "/Yc")
     set_source_files_properties(Glitter/Sources/impl.cpp PROPERTIES COMPILE_FLAGS "/Y- /Ox")
 
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -93,6 +94,8 @@ if (MSVC)
 	MYGL_GROUP_SOURCES(NAME "Sources" SRCS ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 	MYGL_GROUP_SOURCES(NAME "Shaders" SRCS ${PROJECT_SHADERS})
 
+else()
+    set(CMAKE_CXX_FLAGS "-Winvalid-pch ${CMAKE_CXX_FLAGS}")
 endif()
 
 #source_group("Shaders" FILES ${PROJECT_SHADERS})
