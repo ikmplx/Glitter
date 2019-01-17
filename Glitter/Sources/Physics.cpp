@@ -62,7 +62,7 @@ namespace MyGL
 
 	void PhysicsSystem::Update(ScenePtr scene, float dt)
 	{
-		for (auto& entity : scene->ForEachEntity<PhysicsComponent>()) {
+		for (const auto& entity : scene->ForEachEntity<PhysicsComponent>()) {
 			auto comp = scene->GetComponent<PhysicsComponent>(entity);
 			MyAssert(comp != nullptr);
 

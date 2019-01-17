@@ -6,7 +6,7 @@
 #include "Utils.h"
 #include <ctime>
 
-template MyGL::Utils::TypeIdCounter<MyGL::Component>;
+template class MyGL::Utils::TypeIdCounter<MyGL::Component>;
 
 namespace MyGL
 {

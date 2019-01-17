@@ -17,7 +17,7 @@ namespace MyGL
 		template<typename T2>
 		int TypeIdCounter<T2>::counter;
 
-		extern template TypeIdCounter<MyGL::Component>;
+		extern template class TypeIdCounter<MyGL::Component>;
 
 		template<typename T, typename T2>
 		struct TypeId

@@ -10,6 +10,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#if defined _MSC_VER
+
 #pragma warning(push, 0) 
 #include "imgui.h"
 #pragma warning(pop)
@@ -22,6 +24,13 @@
 #pragma warning( disable : 26451 )
 #include <btBulletDynamicsCommon.h>
 #pragma warning( pop )
+
+#else
+
+#include "imgui.h"
+#include <btBulletDynamicsCommon.h>
+
+#endif
 
 // Standard Headers
 #include <cstdio>
