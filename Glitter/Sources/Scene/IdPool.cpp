@@ -45,7 +45,7 @@ namespace MyGL
 			_allIds.resize(newIdsCount + _allIds.size(), false);
 
 			for (size_t i = 0; i < newIdsCount; i++) {
-				_pool.push_back(lastId + (newIdsCount - i));
+				_pool.push_back(lastId + (int)(newIdsCount - i));
 			}
 		}
 	}
