@@ -32,7 +32,7 @@ include_directories(Glitter/Sources/
 					Glitter/Vendor/imgui/
 					Glitter/Vendor/imgui_impl/)
                     
-if (MSVS)
+if (MSVC)
     include_directories(Glitter/Sources/Pch)
 else()
     include_directories(${CMAKE_BINARY_DIR}/pch)
